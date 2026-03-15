@@ -1,0 +1,211 @@
+AUTONOMOUS CYBER BATTLE HACKATHON
+PARTICIPANT RULEBOOK / DESCRIPTION / INSTRUCTIONS
+Version: 1.0
+Date: 2026-03-15
+
+============================================================
+1) WHAT THIS HACKATHON IS
+============================================================
+You are building autonomous bots for a live attack-defense cyber battle.
+Each team has vulnerable services and must:
+- Attack other teams to gain points.
+- Defend its own services to preserve HP and avoid penalties.
+- Adapt strategy as the active target service rotates during the battle.
+
+This is an automation challenge. Your code should run without manual intervention.
+
+============================================================
+2) CORE OBJECTIVE
+============================================================
+Your final score is based on:
+- Attack performance against other teams.
+- Defense performance and uptime/health of your own services.
+- Penalties for invalid actions or abuse patterns.
+
+High-level strategy:
+- Keep your own services healthy.
+- Attack consistently and intelligently.
+- React quickly when the active service changes.
+
+============================================================
+3) IMPORTANT ENDPOINTS AND PORTS
+============================================================
+Platform-level:
+- Admin dashboard: http://<HOST_IP>:4000
+- Public tournament display: http://<HOST_IP>:5000
+- Orchestrator API: http://<HOST_IP>:9000
+
+Your team resources:
+- Team proxy endpoint (for your service stack):
+  Team 1 -> http://<HOST_IP>:9100
+  Team 2 -> http://<HOST_IP>:9101
+  Team 3 -> http://<HOST_IP>:9102
+  Team 4 -> http://<HOST_IP>:9103
+  Team 5 -> http://<HOST_IP>:9104
+  Team 6 -> http://<HOST_IP>:9105
+  Team 7 -> http://<HOST_IP>:9106
+  Team 8 -> http://<HOST_IP>:9107
+  Team 9 -> http://<HOST_IP>:9108
+  Team 10 -> http://<HOST_IP>:9109
+
+- Team IDE endpoint (Monaco-based):
+  Team 1 -> http://<HOST_IP>:8100
+  Team 2 -> http://<HOST_IP>:8101
+  Team 3 -> http://<HOST_IP>:8102
+  Team 4 -> http://<HOST_IP>:8103
+  Team 5 -> http://<HOST_IP>:8104
+  Team 6 -> http://<HOST_IP>:8105
+  Team 7 -> http://<HOST_IP>:8106
+  Team 8 -> http://<HOST_IP>:8107
+  Team 9 -> http://<HOST_IP>:8108
+  Team 10 -> http://<HOST_IP>:8109
+
+If you are Team N, use your assigned proxy and IDE port.
+
+============================================================
+4) BATTLE FLOW
+============================================================
+- The organizer starts the battle from the admin dashboard.
+- The orchestrator rotates active service slots (example: web, api, file, db).
+- Your bot should continuously:
+  1) Read battle context and active service.
+  2) Select targets.
+  3) Launch attacks.
+  4) Trigger defense actions on your own services.
+  5) Repeat.
+
+============================================================
+5) API BASICS FOR PARTICIPANTS
+============================================================
+A) Orchestrator (read-only for teams)
+- GET /current
+  Returns current active service and timing context.
+- GET /teams
+  Returns registered teams.
+- GET /scores
+  Returns live score table.
+- GET /stream
+  SSE live feed of battle state.
+
+B) Your local team stack (via your proxy)
+- POST /damage
+  Apply damage when attack conditions are valid.
+- POST /heal
+  Recover service HP in allowed conditions.
+- POST /flags/activate
+- POST /flags/deactivate
+- GET /health
+  Service health and HP info.
+
+Note:
+Your IDE starter bots already include examples for attacker and defender loops.
+
+============================================================
+6) BOT DEVELOPMENT RULES
+============================================================
+Allowed languages in IDE runtime:
+- Python
+- JavaScript (Node.js)
+- Go
+- Java
+- C
+- Bash
+
+General requirements:
+- Your bot must run autonomously.
+- Handle network errors and timeouts gracefully.
+- Avoid crashing loops (add retries/backoff).
+- Keep logs readable and useful.
+
+Recommended architecture:
+- Attacker process:
+  Reads active service, selects enemy targets, submits attack requests.
+- Defender process:
+  Monitors own status, toggles defense actions, heals when needed.
+
+============================================================
+7) FAIR PLAY AND PROHIBITED BEHAVIOR
+============================================================
+You must NOT:
+- Attack platform infrastructure (admin, display, orchestrator host).
+- Deny service globally (DoS against event infrastructure).
+- Tamper with other teams' IDE/runtime containers directly.
+- Use out-of-band host-level exploits.
+- Bypass intended challenge boundaries.
+
+All activity should stay inside the provided battle API/game mechanics.
+Violations may result in penalty or disqualification.
+
+============================================================
+8) RATE AND DAMAGE LIMITS
+============================================================
+The platform enforces protection rules such as damage windows/caps.
+Example observed cap behavior: rapid repeated damage is limited per window.
+
+What this means for your bot:
+- Spamming blindly is inefficient.
+- Smarter timing and target selection usually perform better.
+
+============================================================
+9) SECRETS AND AUTH
+============================================================
+Some actions require a shared secret token in payloads.
+Use the hackathon secret configured by organizers.
+If your starter bot includes an environment variable, do not hardcode random values.
+
+Expected variable name used by starter templates:
+- HACKATHON_SECRET
+
+============================================================
+10) TESTING CHECKLIST FOR TEAMS
+============================================================
+Before battle start:
+- Open your IDE URL and confirm /api/status is reachable.
+- Run starter attacker bot and confirm log output appears.
+- Run starter defender bot and confirm log output appears.
+- Verify your bot can parse orchestrator /current and /teams responses.
+
+During battle:
+- Watch logs for request failures and handle retries.
+- Adapt when active service changes.
+- Keep defense active while maintaining attack cadence.
+
+============================================================
+11) SUBMISSION / DELIVERY FORMAT
+============================================================
+Deliver at least:
+- attacker.<ext>
+- defender.<ext>
+
+Optional:
+- helper modules/files used by your bot logic.
+
+Your bot must be runnable from the team IDE environment.
+
+============================================================
+12) QUICK START (PRACTICAL)
+============================================================
+1. Open your team IDE URL (port 810x).
+2. Inspect starter bots in workspace.
+3. Read context panel (orchestrator URL, enemy targets, own proxy).
+4. Run attacker and defender bots.
+5. Monitor logs and iterate fast.
+6. Improve logic: target selection, service-aware attack timing, failover.
+
+============================================================
+13) WINNING TIPS
+============================================================
+- Track active service from /current every loop.
+- Use lightweight state in memory: recent target success/failure.
+- Rotate targets based on response quality, not random only.
+- Defend proactively when your HP trends down.
+- Add jitter and backoff to avoid synchronized bot traffic spikes.
+
+============================================================
+14) ORGANIZER NOTES
+============================================================
+- Final interpretation of rules is up to organizers.
+- Organizers may patch platform issues during event operation.
+- In case of incident, pause/resume instructions from organizers are binding.
+
+Good luck. Build smart, resilient bots and keep your systems alive.

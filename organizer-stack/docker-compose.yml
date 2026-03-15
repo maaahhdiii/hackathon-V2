@@ -1,0 +1,364 @@
+version: '3.8'
+
+networks:
+  battle-net:
+    driver: bridge
+  management-net:
+    driver: bridge
+
+x-team-web: &team-web
+  build: ../team-stack/web-server
+  networks: [battle-net, management-net]
+  environment:
+    - HACKATHON_SECRET=HACKATHON_SECRET_2025
+  restart: unless-stopped
+
+x-team-api: &team-api
+  build: ../team-stack/api-server
+  networks: [battle-net, management-net]
+  environment:
+    - HACKATHON_SECRET=HACKATHON_SECRET_2025
+  restart: unless-stopped
+
+x-team-file: &team-file
+  build: ../team-stack/file-server
+  networks: [battle-net, management-net]
+  environment:
+    - HACKATHON_SECRET=HACKATHON_SECRET_2025
+  restart: unless-stopped
+
+x-team-db: &team-db
+  build: ../team-stack/db-server
+  networks: [battle-net, management-net]
+  environment:
+    - HACKATHON_SECRET=HACKATHON_SECRET_2025
+  restart: unless-stopped
+
+services:
+  team1-web: { <<: *team-web, container_name: team1-web }
+  team1-api: { <<: *team-api, container_name: team1-api }
+  team1-file: { <<: *team-file, container_name: team1-file }
+  team1-db: { <<: *team-db, container_name: team1-db }
+  team1-proxy:
+    build: ../team-stack/nginx
+    container_name: team1-proxy
+    ports: ["9100:80"]
+    networks: [battle-net, management-net]
+    volumes:
+      - ./nginx-configs/team1.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+  team1-ide:
+    build: ../team-stack/bot-ide
+    container_name: team1-ide
+    ports: ["8100:8080"]
+    networks: [battle-net, management-net]
+    environment:
+      - TEAM_ID=1
+      - TEAM_NAME=Team 1
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - MY_PROXY_PORT=9100
+      - SERVER_IP=192.168.1.100
+    volumes:
+      - team1-code:/app/workspace
+    restart: unless-stopped
+
+  team2-web: { <<: *team-web, container_name: team2-web }
+  team2-api: { <<: *team-api, container_name: team2-api }
+  team2-file: { <<: *team-file, container_name: team2-file }
+  team2-db: { <<: *team-db, container_name: team2-db }
+  team2-proxy:
+    build: ../team-stack/nginx
+    container_name: team2-proxy
+    ports: ["9101:80"]
+    networks: [battle-net, management-net]
+    volumes:
+      - ./nginx-configs/team2.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+  team2-ide:
+    build: ../team-stack/bot-ide
+    container_name: team2-ide
+    ports: ["8101:8080"]
+    networks: [battle-net, management-net]
+    environment:
+      - TEAM_ID=2
+      - TEAM_NAME=Team 2
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - MY_PROXY_PORT=9101
+      - SERVER_IP=192.168.1.100
+    volumes:
+      - team2-code:/app/workspace
+    restart: unless-stopped
+
+  team3-web: { <<: *team-web, container_name: team3-web }
+  team3-api: { <<: *team-api, container_name: team3-api }
+  team3-file: { <<: *team-file, container_name: team3-file }
+  team3-db: { <<: *team-db, container_name: team3-db }
+  team3-proxy:
+    build: ../team-stack/nginx
+    container_name: team3-proxy
+    ports: ["9102:80"]
+    networks: [battle-net, management-net]
+    volumes:
+      - ./nginx-configs/team3.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+  team3-ide:
+    build: ../team-stack/bot-ide
+    container_name: team3-ide
+    ports: ["8102:8080"]
+    networks: [battle-net, management-net]
+    environment:
+      - TEAM_ID=3
+      - TEAM_NAME=Team 3
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - MY_PROXY_PORT=9102
+      - SERVER_IP=192.168.1.100
+    volumes:
+      - team3-code:/app/workspace
+    restart: unless-stopped
+
+  team4-web: { <<: *team-web, container_name: team4-web }
+  team4-api: { <<: *team-api, container_name: team4-api }
+  team4-file: { <<: *team-file, container_name: team4-file }
+  team4-db: { <<: *team-db, container_name: team4-db }
+  team4-proxy:
+    build: ../team-stack/nginx
+    container_name: team4-proxy
+    ports: ["9103:80"]
+    networks: [battle-net, management-net]
+    volumes:
+      - ./nginx-configs/team4.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+  team4-ide:
+    build: ../team-stack/bot-ide
+    container_name: team4-ide
+    ports: ["8103:8080"]
+    networks: [battle-net, management-net]
+    environment:
+      - TEAM_ID=4
+      - TEAM_NAME=Team 4
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - MY_PROXY_PORT=9103
+      - SERVER_IP=192.168.1.100
+    volumes:
+      - team4-code:/app/workspace
+    restart: unless-stopped
+
+  team5-web: { <<: *team-web, container_name: team5-web }
+  team5-api: { <<: *team-api, container_name: team5-api }
+  team5-file: { <<: *team-file, container_name: team5-file }
+  team5-db: { <<: *team-db, container_name: team5-db }
+  team5-proxy:
+    build: ../team-stack/nginx
+    container_name: team5-proxy
+    ports: ["9104:80"]
+    networks: [battle-net, management-net]
+    volumes:
+      - ./nginx-configs/team5.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+  team5-ide:
+    build: ../team-stack/bot-ide
+    container_name: team5-ide
+    ports: ["8104:8080"]
+    networks: [battle-net, management-net]
+    environment:
+      - TEAM_ID=5
+      - TEAM_NAME=Team 5
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - MY_PROXY_PORT=9104
+      - SERVER_IP=192.168.1.100
+    volumes:
+      - team5-code:/app/workspace
+    restart: unless-stopped
+
+  team6-web: { <<: *team-web, container_name: team6-web }
+  team6-api: { <<: *team-api, container_name: team6-api }
+  team6-file: { <<: *team-file, container_name: team6-file }
+  team6-db: { <<: *team-db, container_name: team6-db }
+  team6-proxy:
+    build: ../team-stack/nginx
+    container_name: team6-proxy
+    ports: ["9105:80"]
+    networks: [battle-net, management-net]
+    volumes:
+      - ./nginx-configs/team6.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+  team6-ide:
+    build: ../team-stack/bot-ide
+    container_name: team6-ide
+    ports: ["8105:8080"]
+    networks: [battle-net, management-net]
+    environment:
+      - TEAM_ID=6
+      - TEAM_NAME=Team 6
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - MY_PROXY_PORT=9105
+      - SERVER_IP=192.168.1.100
+    volumes:
+      - team6-code:/app/workspace
+    restart: unless-stopped
+
+  team7-web: { <<: *team-web, container_name: team7-web }
+  team7-api: { <<: *team-api, container_name: team7-api }
+  team7-file: { <<: *team-file, container_name: team7-file }
+  team7-db: { <<: *team-db, container_name: team7-db }
+  team7-proxy:
+    build: ../team-stack/nginx
+    container_name: team7-proxy
+    ports: ["9106:80"]
+    networks: [battle-net, management-net]
+    volumes:
+      - ./nginx-configs/team7.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+  team7-ide:
+    build: ../team-stack/bot-ide
+    container_name: team7-ide
+    ports: ["8106:8080"]
+    networks: [battle-net, management-net]
+    environment:
+      - TEAM_ID=7
+      - TEAM_NAME=Team 7
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - MY_PROXY_PORT=9106
+      - SERVER_IP=192.168.1.100
+    volumes:
+      - team7-code:/app/workspace
+    restart: unless-stopped
+
+  team8-web: { <<: *team-web, container_name: team8-web }
+  team8-api: { <<: *team-api, container_name: team8-api }
+  team8-file: { <<: *team-file, container_name: team8-file }
+  team8-db: { <<: *team-db, container_name: team8-db }
+  team8-proxy:
+    build: ../team-stack/nginx
+    container_name: team8-proxy
+    ports: ["9107:80"]
+    networks: [battle-net, management-net]
+    volumes:
+      - ./nginx-configs/team8.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+  team8-ide:
+    build: ../team-stack/bot-ide
+    container_name: team8-ide
+    ports: ["8107:8080"]
+    networks: [battle-net, management-net]
+    environment:
+      - TEAM_ID=8
+      - TEAM_NAME=Team 8
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - MY_PROXY_PORT=9107
+      - SERVER_IP=192.168.1.100
+    volumes:
+      - team8-code:/app/workspace
+    restart: unless-stopped
+
+  team9-web: { <<: *team-web, container_name: team9-web }
+  team9-api: { <<: *team-api, container_name: team9-api }
+  team9-file: { <<: *team-file, container_name: team9-file }
+  team9-db: { <<: *team-db, container_name: team9-db }
+  team9-proxy:
+    build: ../team-stack/nginx
+    container_name: team9-proxy
+    ports: ["9108:80"]
+    networks: [battle-net, management-net]
+    volumes:
+      - ./nginx-configs/team9.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+  team9-ide:
+    build: ../team-stack/bot-ide
+    container_name: team9-ide
+    ports: ["8108:8080"]
+    networks: [battle-net, management-net]
+    environment:
+      - TEAM_ID=9
+      - TEAM_NAME=Team 9
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - MY_PROXY_PORT=9108
+      - SERVER_IP=192.168.1.100
+    volumes:
+      - team9-code:/app/workspace
+    restart: unless-stopped
+
+  team10-web: { <<: *team-web, container_name: team10-web }
+  team10-api: { <<: *team-api, container_name: team10-api }
+  team10-file: { <<: *team-file, container_name: team10-file }
+  team10-db: { <<: *team-db, container_name: team10-db }
+  team10-proxy:
+    build: ../team-stack/nginx
+    container_name: team10-proxy
+    ports: ["9109:80"]
+    networks: [battle-net, management-net]
+    volumes:
+      - ./nginx-configs/team10.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+  team10-ide:
+    build: ../team-stack/bot-ide
+    container_name: team10-ide
+    ports: ["8109:8080"]
+    networks: [battle-net, management-net]
+    environment:
+      - TEAM_ID=10
+      - TEAM_NAME=Team 10
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - MY_PROXY_PORT=9109
+      - SERVER_IP=192.168.1.100
+    volumes:
+      - team10-code:/app/workspace
+    restart: unless-stopped
+
+  orchestrator:
+    build: ./orchestrator
+    container_name: orchestrator
+    ports: ["9000:9000"]
+    networks: [battle-net, management-net]
+    environment:
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - SLOT_DURATION=450
+      - TEAM_COUNT=10
+      - SERVER_IP=192.168.1.100
+    restart: unless-stopped
+
+  admin-dashboard:
+    build: ./admin-dashboard
+    container_name: admin-dashboard
+    ports: ["4000:4000"]
+    networks: [management-net]
+    environment:
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - HACKATHON_SECRET=HACKATHON_SECRET_2025
+      - TEAM_COUNT=10
+      - SERVER_IP=192.168.1.100
+    restart: unless-stopped
+    depends_on: [orchestrator]
+
+  tournament-display:
+    build: ./tournament-display
+    container_name: tournament-display
+    ports: ["5000:5000"]
+    networks: [management-net]
+    environment:
+      - ORCHESTRATOR_URL=http://orchestrator:9000
+      - SERVER_IP=192.168.1.100
+    restart: unless-stopped
+    depends_on: [orchestrator]
+
+volumes:
+  team1-code:
+  team2-code:
+  team3-code:
+  team4-code:
+  team5-code:
+  team6-code:
+  team7-code:
+  team8-code:
+  team9-code:
+  team10-code:

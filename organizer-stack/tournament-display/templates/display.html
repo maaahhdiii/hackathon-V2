@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyber Battle // Broadcast HUD</title>
+  <style>
+    :root {
+      --bg: #070a10;
+      --panel: rgba(12, 18, 30, 0.9);
+      --edge: #2a3e5a;
+      --text: #d9f6ff;
+      --muted: #7b95ad;
+      --cyan: #23e5ff;
+      --mint: #47ffc8;
+      --red: #ff5a7a;
+      --yellow: #ffd166;
+      --gold: #f6c451;
+      --silver: #cdd6e0;
+      --bronze: #cf8f57;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(35, 229, 255, 0.15), transparent 34%),
+        radial-gradient(circle at 92% 0%, rgba(71, 255, 200, 0.12), transparent 30%),
+        linear-gradient(180deg, #05070c 0%, #070a10 100%);
+      color: var(--text);
+      font-family: "Consolas", "Lucida Console", monospace;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.03),
+        rgba(255, 255, 255, 0.03) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      opacity: 0.26;
+      mix-blend-mode: screen;
+    }
+
+    .hud-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.12;
+      background-image:
+        linear-gradient(rgba(35, 229, 255, 0.24) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(35, 229, 255, 0.24) 1px, transparent 1px);
+      background-size: 38px 38px;
+    }
+
+    .page {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 112px 64px 1fr 64px;
+      gap: 10px;
+      padding: 10px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .top {
+      border: 1px solid var(--edge);
+      border-radius: 14px;
+      background: linear-gradient(130deg, rgba(11, 19, 32, 0.95), rgba(7, 13, 24, 0.95));
+      box-shadow: 0 0 24px rgba(35, 229, 255, 0.14), inset 0 0 20px rgba(71, 255, 200, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 10px;
+      border: 1px solid rgba(35, 229, 255, 0.5);
+      background: linear-gradient(160deg, rgba(6, 14, 24, 0.98), rgba(9, 22, 36, 0.98));
+      display: grid;
+      place-items: center;
+      box-shadow: inset 0 0 16px rgba(35, 229, 255, 0.2), 0 0 16px rgba(35, 229, 255, 0.1);
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 56px);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      text-shadow: 0 0 14px rgba(35, 229, 255, 0.6);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    .meta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border: 1px solid #31567d;
+      border-radius: 999px;
+      background: rgba(9, 23, 39, 0.85);
+      padding: 7px 11px;
+      font-size: 13px;
+      color: #cdeeff;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .timer {
+      border-color: rgba(255, 209, 102, 0.7);
+      color: var(--yellow);
+      background: rgba(50, 40, 11, 0.55);
+      font-weight: 700;
+    }
+
+    .service {
+      color: var(--mint);
+      border-color: rgba(71, 255, 200, 0.7);
+      text-shadow: 0 0 18px rgba(71, 255, 200, 0.8);
+      animation: glowPulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(71, 255, 200, 0.2); }
+      50% { box-shadow: 0 0 18px rgba(71, 255, 200, 0.58); }
+    }
+
+    .rotation {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .segment {
+      border: 1px solid #2b4564;
+      border-radius: 8px;
+      background: rgba(10, 17, 28, 0.9);
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #9ab9d6;
+      letter-spacing: 0.6px;
+    }
+
+    .segment.active {
+      border-color: rgba(35, 229, 255, 0.9);
+      color: #e1fbff;
+      background: linear-gradient(120deg, rgba(13, 37, 58, 0.95), rgba(11, 57, 74, 0.95));
+      box-shadow: 0 0 14px rgba(35, 229, 255, 0.45);
+    }
+
+    .scoreboard {
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-auto-rows: minmax(130px, 1fr);
+      gap: 10px;
+    }
+
+    .team {
+      border: 1px solid #2a405c;
+      border-radius: 11px;
+      background: linear-gradient(150deg, rgba(11, 18, 29, 0.96), rgba(8, 13, 22, 0.96));
+      padding: 10px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 6px;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .team:hover { transform: translateY(-2px); }
+
+    .rank {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0.8px;
+    }
+
+    .rank.gold {
+      color: var(--gold);
+      text-shadow: 0 0 16px rgba(246, 196, 81, 0.65);
+    }
+
+    .rank.silver { color: var(--silver); }
+    .rank.bronze { color: var(--bronze); }
+
+    .team-name {
+      font-size: 18px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .team-score {
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--cyan);
+      text-shadow: 0 0 18px rgba(35, 229, 255, 0.45);
+      transition: all 0.5s ease;
+    }
+
+    .mini-bars {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .mini {
+      font-size: 10px;
+      color: #98b4cb;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .mini .bar {
+      margin-top: 2px;
+      height: 8px;
+      border-radius: 999px;
+      border: 1px solid #2d4663;
+      background: #081018;
+      overflow: hidden;
+    }
+
+    .mini .fill {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .counts {
+      font-size: 11px;
+      color: #a2bdd5;
+      letter-spacing: 0.5px;
+    }
+
+    .ticker-wrap {
+      border: 1px solid #2a425e;
+      border-radius: 10px;
+      background: rgba(8, 15, 24, 0.93);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ticker {
+      position: absolute;
+      white-space: nowrap;
+      will-change: transform;
+      font-size: 13px;
+      line-height: 60px;
+      padding-left: 100%;
+      animation: ticker 28s linear infinite;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .evt-exploit_success { color: var(--red); }
+    .evt-block { color: var(--mint); }
+    .evt-patch { color: var(--cyan); }
+    .evt-heal { color: #82ffe4; }
+    .evt-exploit_attempt { color: #9fb5c8; }
+
+    @media (max-width: 1280px) {
+      .scoreboard { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 980px) {
+      .top { flex-direction: column; align-items: flex-start; }
+      .scoreboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="hud-grid"></div>
+  <div class="page">
+    <div class="top">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 18L32 6L56 18V46L32 58L8 46V18Z" stroke="#23e5ff" stroke-width="3"/>
+            <path d="M20 23H44V30H27V34H44V41H20V23Z" fill="#47ffc8"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="title">Cyber Battle</h1>
+          <div class="subtitle">Broadcast surveillance feed</div>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div id="timer" class="pill timer">00:00 / 30:00</div>
+        <div id="activeService" class="pill service">ACTIVE: WEB</div>
+      </div>
+    </div>
+
+    <div id="rotation" class="rotation"></div>
+
+    <div id="scoreboard" class="scoreboard"></div>
+
+    <div class="ticker-wrap">
+      <div id="ticker" class="ticker"></div>
+    </div>
+  </div>
+
+  <script>
+    const scoreboard = document.getElementById('scoreboard');
+    const timerEl = document.getElementById('timer');
+    const activeServiceEl = document.getElementById('activeService');
+    const rotationEl = document.getElementById('rotation');
+    const tickerEl = document.getElementById('ticker');
+
+    const SLOT_WINDOWS = [
+      ['WEB', '0:00-7:30'],
+      ['API', '7:30-15:00'],
+      ['FILE', '15:00-22:30'],
+      ['DB', '22:30-30:00']
+    ];
+
+    let lastScores = {};
+
+    function hpColor(pct) {
+      if (pct > 60) return '#47ffc8';
+      if (pct >= 30) return '#ffd166';
+      return '#ff5a7a';
+    }
+
+    function fmtMMSS(sec) {
+      const s = Math.max(0, Number(sec || 0));
+      const m = String(Math.floor(s / 60)).padStart(2, '0');
+      const r = String(s % 60).padStart(2, '0');
+      return `${m}:${r}`;
+    }
+
+    function rankClass(idx) {
+      if (idx === 0) return 'gold';
+      if (idx === 1) return 'silver';
+      if (idx === 2) return 'bronze';
+      return '';
+    }
+
+    function renderRotation(active) {
+      rotationEl.innerHTML = '';
+      SLOT_WINDOWS.forEach(([name, win]) => {
+        const div = document.createElement('div');
+        div.className = `segment ${active === name.toLowerCase() ? 'active' : ''}`;
+        div.innerHTML = `<strong>${name}</strong><span>${win}</span>`;
+        rotationEl.appendChild(div);
+      });
+    }
+
+    function animateScore(el, fromVal, toVal) {
+      const start = performance.now();
+      const duration = 550;
+      const step = (ts) => {
+        const p = Math.min(1, (ts - start) / duration);
+        const val = fromVal + (toVal - fromVal) * p;
+        el.textContent = val.toFixed(1);
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    function renderScoreboard(teams) {
+      const sorted = [...teams].sort((a, b) => (b.score || 0) - (a.score || 0));
+      scoreboard.innerHTML = '';
+
+      sorted.slice(0, 10).forEach((t, idx) => {
+        const rank = idx + 1;
+        const hp = t.hp || {};
+        const score = Number(t.score || 0);
+
+        const card = document.createElement('div');
+        card.className = 'team';
+
+        const mini = ['web', 'api', 'file', 'db'].map((svc) => {
+          const max = svc === 'web' ? 40 : 30;
+          const value = Number(hp[svc] || 0);
+          const pct = Math.max(0, Math.min(100, (value / max) * 100));
+          return `
+            <div class="mini">
+              ${svc.toUpperCase()} ${value}
+              <div class="bar"><div class="fill" style="width:${pct}%;background:${hpColor(pct)}"></div></div>
+            </div>`;
+        }).join('');
+
+        card.innerHTML = `
+          <div class="rank ${rankClass(idx)}">#${rank}</div>
+          <div class="team-name">${t.name || t.ip}</div>
+          <div class="team-score" id="score-${t.ip}">${score.toFixed(1)}</div>
+          <div class="mini-bars">${mini}</div>
+          <div class="counts">ATK ${t.attacks || 0} | DEF ${t.defenses || 0}</div>
+        `;
+
+        scoreboard.appendChild(card);
+
+        const prev = Number(lastScores[t.ip] ?? score);
+        if (prev !== score) {
+          const el = card.querySelector(`#score-${CSS.escape(t.ip)}`) || card.querySelector('.team-score');
+          if (el) animateScore(el, prev, score);
+        }
+        lastScores[t.ip] = score;
+      });
+    }
+
+    function renderTicker(events) {
+      if (!events || !events.length) {
+        tickerEl.textContent = 'Awaiting network events...';
+        return;
+      }
+      const text = events.slice(-15).map((e) => {
+        const cls = `evt-${e.type || 'exploit_attempt'}`;
+        const ts = e.timestamp ? new Date(e.timestamp * 1000).toLocaleTimeString() : '--:--:--';
+        return `<span class="${cls}">[${ts}] ${e.type} src=${e.source_team_ip || '-'} tgt=${e.target_team_ip || '-'} vuln=${e.vuln || '-'} hp=${e.hp_delta ?? 0}</span>`;
+      }).join('  |  ');
+      tickerEl.innerHTML = text;
+    }
+
+    function connect() {
+      const es = new EventSource('/stream');
+      es.onmessage = (evt) => {
+        try {
+          const d = JSON.parse(evt.data);
+          timerEl.textContent = `${fmtMMSS(d.battle_elapsed)} / 30:00`;
+          activeServiceEl.textContent = `ACTIVE: ${(d.active_service || 'web').toUpperCase()}`;
+          renderRotation((d.active_service || 'web').toLowerCase());
+          renderScoreboard((d.teams || []).map((t) => ({
+            ip: t.ip,
+            name: t.name,
+            hp: t.hp,
+            score: t.score,
+            attacks: t.attacks,
+            defenses: t.defenses
+          })));
+          renderTicker(d.recent_events || []);
+        } catch (_) {}
+      };
+      es.onerror = () => {
+        es.close();
+        setTimeout(connect, 2000);
+      };
+    }
+
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+
+    connect();
+  </script>
+</body>
+</html>

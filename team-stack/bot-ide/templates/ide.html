@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team {{ team_id }} IDE</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #141b24;
+      --line: #2a3545;
+      --text: #e6edf3;
+      --muted: #91a4b8;
+      --green: #2ea043;
+      --red: #f85149;
+      --cyan: #2f81f7;
+      --amber: #d29922;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--text); font-family: Consolas, monospace; background: #0d1117; }
+    .layout { display: grid; grid-template-columns: 220px 1fr; grid-template-rows: 62px 1fr 220px; height: 100vh; }
+    .top { grid-column: 1 / span 2; background: var(--panel); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; gap: 8px; }
+    .left { border-right: 1px solid var(--line); background: #10161f; padding: 10px; overflow: auto; }
+    .main { position: relative; }
+    .bottom { grid-column: 1 / span 2; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; background: #0b1118; }
+    .title { font-weight: 700; }
+    .tabs { display: flex; gap: 6px; }
+    .tab { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; color: var(--muted); }
+    .tab.active { color: #fff; border-color: var(--cyan); background: #16263b; }
+    .actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .btn { border: none; border-radius: 8px; color: #fff; padding: 7px 10px; cursor: pointer; font-family: inherit; font-size: 12px; }
+    .run { background: var(--green); }
+    .stop { background: var(--red); }
+    .copy { background: var(--amber); color: #141414; }
+    .status-dot { width: 10px; height: 10px; border-radius: 999px; background: #6b7280; display: inline-block; }
+    .status-dot.running { background: var(--green); box-shadow: 0 0 8px rgba(46,160,67,0.7); }
+    .files-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .small-btn { background: var(--cyan); color: #fff; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-family: inherit; font-size: 11px; }
+    .file-list { display: grid; gap: 4px; }
+    .file-item { padding: 6px 8px; border: 1px solid #273241; border-radius: 6px; cursor: pointer; color: #c9d7e5; }
+    .file-item.active { border-color: var(--cyan); background: #14273f; }
+    .info { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; font-size: 12px; color: var(--muted); }
+    #editor { position: absolute; inset: 0; }
+    .log { border-right: 1px solid var(--line); display: grid; grid-template-rows: 30px 1fr; }
+    .log:last-child { border-right: none; }
+    .log-title { padding: 6px 8px; border-bottom: 1px solid var(--line); color: #9cc9ff; }
+    pre { margin: 0; padding: 8px; overflow: auto; font-size: 12px; white-space: pre-wrap; word-break: break-word; color: #85f7a1; }
+    pre .err { color: #ff9aa3; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+</head>
+<body>
+  <div class="layout">
+    <div class="top">
+      <div class="title">{{ team_name }} // Team {{ team_id }}</div>
+      <div class="tabs">
+        <div id="tab-attacker" class="tab active">Attacker</div>
+        <div id="tab-defender" class="tab">Defender</div>
+      </div>
+      <div class="actions">
+        <select id="langSelect">
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="go">Go</option>
+          <option value="java">Java</option>
+          <option value="c">C</option>
+          <option value="shell">Bash</option>
+        </select>
+        <button class="btn run" id="runBtn">Run</button>
+        <button class="btn stop" id="stopBtn">Stop</button>
+        <button class="btn copy" id="copyCtxBtn">Copy context</button>
+        <span id="statusDot" class="status-dot"></span>
+      </div>
+    </div>
+
+    <div class="left">
+      <div class="files-head">
+        <strong>Workspace</strong>
+        <button class="small-btn" id="newFileBtn">New File</button>
+      </div>
+      <div id="fileList" class="file-list"></div>
+      <div class="info" id="contextPanel">Loading context...</div>
+    </div>
+
+    <div class="main"><div id="editor"></div></div>
+
+    <div class="bottom">
+      <div class="log">
+        <div class="log-title">Attacker logs</div>
+        <pre id="attackerLogs"></pre>
+      </div>
+      <div class="log">
+        <div class="log-title">Defender logs</div>
+        <pre id="defenderLogs"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let editor;
+    let model;
+    let files = [];
+    let currentFile = null;
+    let currentTab = 'attacker';
+    let lastLogSizes = { attacker: 0, defender: 0 };
+    let contextData = null;
+
+    const extToMonaco = {
+      py: 'python', js: 'javascript', go: 'go', java: 'java', c: 'c', cpp: 'cpp', sh: 'shell'
+    };
+
+    const langComment = {
+      python: '#', javascript: '//', go: '//', java: '//', c: '//', cpp: '//', shell: '#'
+    };
+
+    function fileExt(name) {
+      const i = name.lastIndexOf('.');
+      return i >= 0 ? name.slice(i + 1).toLowerCase() : 'py';
+    }
+
+    function monacoLangForFile(name) {
+      return extToMonaco[fileExt(name)] || 'python';
+    }
+
+    async function api(url, opts = {}) {
+      const res = await fetch(url, opts);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    }
+
+    function renderFiles() {
+      const list = document.getElementById('fileList');
+      list.innerHTML = '';
+      files.forEach((f) => {
+        const div = document.createElement('div');
+        div.className = `file-item ${f === currentFile ? 'active' : ''}`;
+        div.textContent = f;
+        div.onclick = () => loadFile(f);
+        list.appendChild(div);
+      });
+    }
+
+    async function refreshFiles() {
+      const data = await api('/api/files');
+      files = data.files || [];
+      if (!currentFile && files.length) currentFile = files[0];
+      renderFiles();
+      if (currentFile) await loadFile(currentFile);
+    }
+
+    async function loadFile(name) {
+      const data = await api(`/api/files/${encodeURIComponent(name)}`);
+      currentFile = name;
+      model.setValue(data.content || '');
+      monaco.editor.setModelLanguage(model, monacoLangForFile(name));
+      document.getElementById('langSelect').value = monacoLangForFile(name);
+      renderFiles();
+    }
+
+    async function saveCurrentFile() {
+      if (!currentFile) return;
+      await api(`/api/files/${encodeURIComponent(currentFile)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: model.getValue() })
+      });
+    }
+
+    function setRunning(isRunning) {
+      const dot = document.getElementById('statusDot');
+      dot.className = `status-dot ${isRunning ? 'running' : ''}`;
+    }
+
+    async function runCurrent() {
+      if (!currentFile) return;
+      await saveCurrentFile();
+      await api(`/api/run/${currentTab}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: currentFile })
+      });
+      setRunning(true);
+    }
+
+    async function stopCurrent() {
+      await api(`/api/stop/${currentTab}`, { method: 'POST' });
+      setRunning(false);
+    }
+
+    async function newFile() {
+      const name = prompt('New file name', `${currentTab}.py`);
+      if (!name) return;
+      await api(`/api/files/${encodeURIComponent(name)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: '' })
+      });
+      await refreshFiles();
+      await loadFile(name);
+    }
+
+    async function pollLogs(name) {
+      const data = await api(`/api/logs/${name}`);
+      const logEl = document.getElementById(`${name}Logs`);
+      const logs = data.logs || [];
+      const html = logs.map((line) => {
+        const escaped = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return /error|exception|traceback/i.test(line) ? `<span class=\"err\">${escaped}</span>` : escaped;
+      }).join('');
+      logEl.innerHTML = html;
+      logEl.scrollTop = logEl.scrollHeight;
+      if (name === currentTab) setRunning(!!data.running);
+    }
+
+    async function pollStatus() {
+      try {
+        await Promise.all([pollLogs('attacker'), pollLogs('defender')]);
+      } catch (_) {}
+    }
+
+    function contextBlockForLanguage(lang) {
+      if (!contextData) return '';
+      const c = langComment[lang] || '#';
+      const lines = [
+        `${c} TEAM_ID=${contextData.team_id}`,
+        `${c} TEAM_NAME=${contextData.team_name}`,
+        `${c} MY_PROXY=${contextData.my_proxy}`,
+        `${c} ORCH=${contextData.orchestrator}`,
+        `${c} ENEMY_TARGETS=${(contextData.enemy_targets || []).join(',')}`
+      ];
+      return lines.join('\n');
+    }
+
+    async function copyContext() {
+      const lang = document.getElementById('langSelect').value;
+      const block = contextBlockForLanguage(lang);
+      await navigator.clipboard.writeText(block);
+      alert('Context copied');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-attacker').classList.toggle('active', tab === 'attacker');
+      document.getElementById('tab-defender').classList.toggle('active', tab === 'defender');
+    }
+
+    async function loadContext() {
+      try {
+        contextData = await api('/api/context');
+        document.getElementById('contextPanel').innerHTML = [
+          `<div><strong>My proxy:</strong> ${contextData.my_proxy}</div>`,
+          `<div><strong>Orchestrator:</strong> ${contextData.orchestrator}</div>`,
+          `<div><strong>Enemy targets:</strong></div>`,
+          `<div>${(contextData.enemy_targets || []).join('<br>') || 'none'}</div>`
+        ].join('');
+      } catch (err) {
+        document.getElementById('contextPanel').textContent = `Context error: ${err.message}`;
+      }
+    }
+
+    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+    require(['vs/editor/editor.main'], async function () {
+      model = monaco.editor.createModel('', 'python');
+      editor = monaco.editor.create(document.getElementById('editor'), {
+        model,
+        theme: 'vs-dark',
+        automaticLayout: true,
+        minimap: { enabled: true },
+        fontSize: 14
+      });
+
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, async () => {
+        await saveCurrentFile();
+      });
+
+      await refreshFiles();
+      await loadContext();
+      await pollStatus();
+
+      setInterval(pollStatus, 2000);
+      setInterval(async () => { try { await saveCurrentFile(); } catch (_) {} }, 10000);
+    });
+
+    document.getElementById('runBtn').onclick = runCurrent;
+    document.getElementById('stopBtn').onclick = stopCurrent;
+    document.getElementById('newFileBtn').onclick = newFile;
+    document.getElementById('copyCtxBtn').onclick = copyContext;
+    document.getElementById('tab-attacker').onclick = () => switchTab('attacker');
+    document.getElementById('tab-defender').onclick = () => switchTab('defender');
+  </script>
+</body>
+</html>
