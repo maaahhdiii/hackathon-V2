@@ -272,6 +272,36 @@ How to read these diagrams quickly:
 
 ---
 
+## 2.2 Real interface screenshots
+
+These are real captures from the running platform web interfaces.
+
+### Team IDE (live)
+
+![Team IDE](docs/screenshots/team-ide.png)
+
+### Admin dashboard (add file to show here)
+
+When you add this file, GitHub will render it in this section:
+
+`docs/screenshots/admin-dashboard.png`
+
+```markdown
+![Admin Dashboard](docs/screenshots/admin-dashboard.png)
+```
+
+### Tournament display (add file to show here)
+
+When you add this file, GitHub will render it in this section:
+
+`docs/screenshots/tournament-display.png`
+
+```markdown
+![Tournament Display](docs/screenshots/tournament-display.png)
+```
+
+---
+
 ## 3. Folder layout and what each part does
 
 Project root:
