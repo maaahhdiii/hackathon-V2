@@ -58,7 +58,7 @@ services:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - MY_PROXY_PORT=9100
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     volumes:
       - team1-code:/app/workspace
     restart: unless-stopped
@@ -86,7 +86,7 @@ services:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - MY_PROXY_PORT=9101
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     volumes:
       - team2-code:/app/workspace
     restart: unless-stopped
@@ -114,7 +114,7 @@ services:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - MY_PROXY_PORT=9102
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     volumes:
       - team3-code:/app/workspace
     restart: unless-stopped
@@ -142,7 +142,7 @@ services:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - MY_PROXY_PORT=9103
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     volumes:
       - team4-code:/app/workspace
     restart: unless-stopped
@@ -170,7 +170,7 @@ services:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - MY_PROXY_PORT=9104
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     volumes:
       - team5-code:/app/workspace
     restart: unless-stopped
@@ -198,7 +198,7 @@ services:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - MY_PROXY_PORT=9105
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     volumes:
       - team6-code:/app/workspace
     restart: unless-stopped
@@ -226,7 +226,7 @@ services:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - MY_PROXY_PORT=9106
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     volumes:
       - team7-code:/app/workspace
     restart: unless-stopped
@@ -254,7 +254,7 @@ services:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - MY_PROXY_PORT=9107
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     volumes:
       - team8-code:/app/workspace
     restart: unless-stopped
@@ -282,7 +282,7 @@ services:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - MY_PROXY_PORT=9108
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     volumes:
       - team9-code:/app/workspace
     restart: unless-stopped
@@ -310,7 +310,7 @@ services:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - MY_PROXY_PORT=9109
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     volumes:
       - team10-code:/app/workspace
     restart: unless-stopped
@@ -323,8 +323,8 @@ services:
     environment:
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
       - SLOT_DURATION=450
-      - TEAM_COUNT=10
-      - SERVER_IP=192.168.1.100
+      - TEAM_COUNT=${TEAM_COUNT:-10}
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     restart: unless-stopped
 
   admin-dashboard:
@@ -335,8 +335,8 @@ services:
     environment:
       - ORCHESTRATOR_URL=http://orchestrator:9000
       - HACKATHON_SECRET=HACKATHON_SECRET_2025
-      - TEAM_COUNT=10
-      - SERVER_IP=192.168.1.100
+      - TEAM_COUNT=${TEAM_COUNT:-10}
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     restart: unless-stopped
     depends_on: [orchestrator]
 
@@ -347,7 +347,7 @@ services:
     networks: [management-net]
     environment:
       - ORCHESTRATOR_URL=http://orchestrator:9000
-      - SERVER_IP=192.168.1.100
+      - SERVER_IP=${SERVER_IP:-192.168.1.100}
     restart: unless-stopped
     depends_on: [orchestrator]
 

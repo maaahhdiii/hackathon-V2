@@ -2,14 +2,14 @@ const axios = require('axios');
 
 const MY_TARGET = process.env.MY_TARGET || 'http://localhost:9100';
 const vulns = ['sql_injection', 'xss', 'csrf', 'rce', 'auth_bypass'];
-const services = ['web', 'dns', 'mail'];
+const services = ['web', 'api', 'file', 'db'];
 
 async function tick() {
   const vuln = vulns[Math.floor(Math.random() * vulns.length)];
   const service = services[Math.floor(Math.random() * services.length)];
   const action = Math.random() > 0.5 ? 'enable' : 'disable';
   try {
-    const r = await axios.post(`${MY_TARGET}/defend`, {
+    const r = await axios.post(`${MY_TARGET}/${service}/defend`, {
       service,
       vulnerability_type: vuln,
       action,

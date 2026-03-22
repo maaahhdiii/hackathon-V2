@@ -11,18 +11,18 @@ int main(void) {
     if (!secret) secret = "HACKATHON_SECRET_2025";
 
     const char *vulns[] = {"sql_injection", "xss", "csrf", "rce", "auth_bypass"};
-    const char *services[] = {"web", "dns", "mail"};
+    const char *services[] = {"web", "api", "file", "db"};
 
     srand((unsigned int)time(NULL));
     printf("[attacker.c] started\n");
 
     while (1) {
         const char *v = vulns[rand() % 5];
-        const char *s = services[rand() % 3];
+        const char *s = services[rand() % 4];
         char cmd[1024];
         snprintf(cmd, sizeof(cmd),
-            "curl -s -X POST %s/attack -H 'Content-Type: application/json' -d '{\"vulnerability_type\":\"%s\",\"service\":\"%s\",\"secret\":\"%s\"}'",
-            target, v, s, secret);
+            "curl -s -X POST %s/%s/attack -H 'Content-Type: application/json' -d '{\"vulnerability_type\":\"%s\",\"service\":\"%s\",\"secret\":\"%s\"}'",
+            target, s, v, s, secret);
         int rc = system(cmd);
         printf("attack %s/%s -> rc=%d\n", s, v, rc);
         sleep(3);

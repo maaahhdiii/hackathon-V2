@@ -30,6 +30,9 @@ func activeService(orch string) string {
 	}
 	svc, ok := data["service"].(string)
 	if !ok || svc == "" {
+		svc, ok = data["active_service"].(string)
+	}
+	if !ok || svc == "" {
 		return "web"
 	}
 	return svc
@@ -50,7 +53,7 @@ func main() {
 			"service":            svc,
 			"secret":             secret,
 		})
-		resp, err := http.Post(target+"/attack", "application/json", bytes.NewBuffer(body))
+		resp, err := http.Post(target+"/"+svc+"/attack", "application/json", bytes.NewBuffer(body))
 		if err != nil {
 			fmt.Println("attack error:", err)
 		} else {

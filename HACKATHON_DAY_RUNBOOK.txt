@@ -1,0 +1,375 @@
+AUTONOMOUS CYBER BATTLE - HACKATHON DAY RUNBOOK
+Version: 1.0
+Audience: Organizers and on-site operators
+
+============================================================
+0) GOAL
+============================================================
+Run the event reliably in real life on hackathon day, from setup to shutdown,
+with clear steps and fallback actions.
+
+============================================================
+1) QUICK OVERVIEW (ONE PAGE)
+============================================================
+1. Power on organizer machine and network.
+2. Start Docker Desktop and verify healthy.
+3. Start platform with zero registered teams.
+4. Verify admin, display, orchestrator, and team IDE URLs.
+5. Add teams one by one from admin and confirm each row.
+6. Open event, onboard participants, test starter bots.
+7. Start battle, monitor health/events/scores.
+8. Handle incidents using troubleshooting section.
+9. Stop battle, export final standings, shutdown cleanly.
+
+============================================================
+2) ROLES ON EVENT DAY
+============================================================
+- Lead Operator:
+  Owns start/stop, battle start, incident decisions.
+- Dashboard Operator:
+  Watches admin panel and event logs continuously.
+- Floor Support:
+  Helps teams connect to IDE/proxy endpoints.
+- Network/Infra Backup:
+  Handles Docker host/network outages.
+
+============================================================
+2.1) PHYSICAL TOPOLOGY FOR YOUR EVENT
+============================================================
+Your exact setup:
+- 1 Server PC (runs Docker stack)
+- 1 Router/Switch (same LAN for all devices)
+- 1 Admin PC (organizer controls)
+- 1 Dashboard PC (public score display)
+- 10 Team PCs (participants use IDEs)
+
+Traffic model:
+- All users access services hosted on Server PC.
+- No services run on admin/dashboard/team PCs.
+- Every client browser opens URLs with SERVER_IP.
+
+============================================================
+2.2) RECOMMENDED IP PLAN (STATIC)
+============================================================
+Use one subnet, example 192.168.1.0/24:
+- Router:        192.168.1.1
+- Server PC:     192.168.1.100
+- Admin PC:      192.168.1.110
+- Dashboard PC:  192.168.1.120
+- Team PCs:      192.168.1.201-192.168.1.210
+
+Rules:
+- Set static/reserved DHCP leases to prevent IP changes.
+- Disable client isolation/guest isolation on router.
+- Keep all devices on same VLAN (unless you intentionally segment).
+
+============================================================
+3) PRE-EVENT CHECKLIST (T-120 to T-60 minutes)
+============================================================
+Host machine:
+- Windows updates paused for event window.
+- Power plan set to High Performance.
+- No sleep/hibernate.
+- Stable LAN or local switch ready.
+- Browser tabs prepared:
+  - http://localhost:4000
+  - http://localhost:5000
+  - http://localhost:9000/current
+
+Software:
+- Docker Desktop running and healthy.
+- Enough disk (at least 20 GB free).
+
+- Enough RAM (recommended 16 GB+).
+Repo:
+- Open terminal in project root:
+  D:\hckathoun V2\hackathon
+
+Network reality check (from Server PC):
+- Confirm server IP is correct (expected 192.168.1.100 or your chosen value).
+- Confirm Admin PC and Dashboard PC can ping Server PC.
+- Confirm at least one Team PC can open http://SERVER_IP:4000.
+
+Set SERVER_IP in compose before event start:
+- In organizer-stack/docker-compose.yml, confirm SERVER_IP matches real Server PC IP.
+- If Server PC IP changed, update SERVER_IP values and restart stack.
+
+============================================================
+4) STARTUP PROCEDURE (T-60 to T-40)
+============================================================
+Step A: Start with zero registered teams
+Command (from project root):
+  start-platform.bat
+
+Expected:
+- Core services running: orchestrator/admin/display.
+- Team service containers are ready.
+- No team appears yet in admin until you add it.
+
+Step B: Verify containers
+Command:
+  cd /d "D:\hckathoun V2\hackathon\organizer-stack"
+  docker compose ps
+
+Step C: Verify APIs quickly
+Commands:
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:9000/current | ConvertTo-Json"
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:4000/api/teams | ConvertTo-Json -Depth 5"
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:8100/api/status | ConvertTo-Json"
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:8101/api/status | ConvertTo-Json"
+
+If all good, proceed to participant onboarding.
+
+Optional pre-registration at startup:
+  start-platform.bat 10
+(Pre-registers Team 1..Team 10 automatically.)
+
+============================================================
+5) PARTICIPANT ONBOARDING (T-40 to T-10)
+============================================================
+Before sharing links with a team, add that team in Admin UI:
+- Use Team number (1-10) and optional name.
+- Click Add Team.
+- Confirm row shows IP, Proxy port, IDE port.
+
+Share with teams:
+- Admin (read-only for most teams):
+  http://SERVER_IP:4000
+- Public display:
+  http://SERVER_IP:5000
+- Team IDE URLs:
+  Team 1:  http://SERVER_IP:8100
+  Team 2:  http://SERVER_IP:8101
+  Team 3:  http://SERVER_IP:8102
+  Team 4:  http://SERVER_IP:8103
+  Team 5:  http://SERVER_IP:8104
+  Team 6:  http://SERVER_IP:8105
+  Team 7:  http://SERVER_IP:8106
+  Team 8:  http://SERVER_IP:8107
+  Team 9:  http://SERVER_IP:8108
+  Team 10: http://SERVER_IP:8109
+
+- Team proxy URLs:
+  Team 1:  http://SERVER_IP:9100
+  Team 2:  http://SERVER_IP:9101
+  Team 3:  http://SERVER_IP:9102
+  Team 4:  http://SERVER_IP:9103
+  Team 5:  http://SERVER_IP:9104
+  Team 6:  http://SERVER_IP:9105
+  Team 7:  http://SERVER_IP:9106
+  Team 8:  http://SERVER_IP:9107
+  Team 9:  http://SERVER_IP:9108
+  Team 10: http://SERVER_IP:9109
+
+Suggested station assignment:
+- Admin PC opens only: http://SERVER_IP:4000
+- Dashboard PC opens only: http://SERVER_IP:5000 (full-screen)
+- Team PC #1 opens Team 1 IDE URL, Team PC #2 opens Team 2 IDE URL, etc.
+
+Team check instructions:
+1. Open assigned IDE URL.
+2. Confirm files visible (starter bots).
+3. Run attacker and defender once.
+4. Confirm logs are printing.
+
+============================================================
+6) BATTLE START PROCEDURE (T-0)
+============================================================
+From admin UI (http://localhost:4000):
+1. Verify expected team list appears.
+2. Confirm no critical errors in UI.
+3. Press "Start Battle".
+
+Direct API fallback (if UI is down):
+  powershell -NoProfile -Command "Invoke-RestMethod -Method Post http://localhost:9000/battle/start"
+
+Immediately verify:
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:9000/current | ConvertTo-Json"
+
+Expected fields:
+- battle_started = true
+- active_service present
+- remaining_seconds counting down
+
+============================================================
+7) LIVE OPERATIONS DURING BATTLE
+============================================================
+Dashboard operator monitors every 2-3 minutes:
+- Admin teams page (HP trends and scores)
+- Events stream activity
+- Tournament display freshness
+
+CLI spot checks:
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:9000/scores | ConvertTo-Json -Depth 6"
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:9000/events | ConvertTo-Json -Depth 6"
+
+Container health checks:
+  cd /d "D:\hckathoun V2\hackathon\organizer-stack"
+  docker compose ps
+
+If one service crashes:
+  docker compose up -d <service_name>
+Example:
+  docker compose up -d team1-ide
+
+============================================================
+8) INCIDENT RESPONSE PLAYBOOK
+============================================================
+A) Team missing in admin panel
+- Check registration:
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:9000/teams | ConvertTo-Json"
+- Re-register manually:
+  powershell -NoProfile -Command "$b=@{team_name='Team 2';ip='team2-proxy'}|ConvertTo-Json;Invoke-RestMethod -Method Post -Uri http://localhost:9000/register -ContentType 'application/json' -Body $b"
+
+B) IDE not loading for a team
+- Check container:
+  docker compose ps team2-ide
+- Restart:
+  docker compose up -d team2-ide
+
+C) Admin UI not loading
+- Check admin container:
+  docker compose ps admin-dashboard
+- Check logs:
+  docker compose logs --tail=100 admin-dashboard
+- Restart:
+  docker compose up -d admin-dashboard
+
+D) Orchestrator not responding
+- Check:
+  docker compose ps orchestrator
+  docker compose logs --tail=100 orchestrator
+- Restart:
+  docker compose up -d orchestrator
+
+E) Whole stack unstable
+- Controlled restart:
+  docker compose down
+  docker compose up -d --build
+- Re-register teams if needed.
+
+============================================================
+9) FAIR PLAY ENFORCEMENT
+============================================================
+Announce clearly before start:
+- No attacks against host infrastructure.
+- No DoS against admin/display/orchestrator.
+- Stay inside provided game interfaces.
+- Rulebook decisions by organizers are final.
+
+Use warnings first, then penalties/disqualification as policy defines.
+
+============================================================
+10) BATTLE STOP AND RESULTS
+============================================================
+Normal stop:
+- Use admin UI "Stop Battle"
+
+API fallback:
+  powershell -NoProfile -Command "Invoke-RestMethod -Method Post http://localhost:9000/battle/stop | ConvertTo-Json -Depth 8"
+
+Collect final results:
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:9000/scores | ConvertTo-Json -Depth 8"
+
+Announce:
+- Final ranking
+- Tie-break process (if any)
+- Prize handoff
+
+============================================================
+11) SHUTDOWN PROCEDURE (POST-EVENT)
+============================================================
+Stop stack:
+  cd /d "D:\hckathoun V2\hackathon\organizer-stack"
+  docker compose down
+
+Optional full cleanup (deletes persistent team IDE volumes):
+  docker compose down -v
+
+Archive logs (recommended):
+  docker compose logs > hackathon_day_logs.txt
+
+============================================================
+12) DAY-OF TIMELINE TEMPLATE
+============================================================
+T-120 min: Infra ready, host checks complete
+T-60  min: Start stack with zero teams, smoke test done
+T-40  min: Team onboarding starts
+T-10  min: Final readiness review
+T-0   min: Start battle
+T+15  min: Mid-battle status announcement
+T+30  min: Stop battle and finalize scores
+T+45  min: Awards and closing
+
+============================================================
+13) OPERATOR COMMAND CHEAT SHEET
+============================================================
+Start (default zero teams):
+  start-platform.bat
+
+Start N teams:
+  start-platform.bat 10
+
+Check compose:
+  cd /d "D:\hckathoun V2\hackathon\organizer-stack"
+  docker compose ps
+
+Orchestrator state:
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:9000/current | ConvertTo-Json"
+
+Team list:
+  powershell -NoProfile -Command "Invoke-RestMethod http://localhost:9000/teams | ConvertTo-Json"
+
+Stop battle:
+  powershell -NoProfile -Command "Invoke-RestMethod -Method Post http://localhost:9000/battle/stop"
+
+Shutdown:
+  docker compose down
+
+============================================================
+14) FINAL PRE-START GO/NO-GO CHECK
+============================================================
+Go only if all are true:
+- Docker healthy
+- Admin, display, orchestrator reachable
+- Expected teams visible in admin
+- Team IDE endpoints reachable
+- At least one attacker/defender test run succeeded per sample team
+
+If any item fails, delay start until fixed.
+
+============================================================
+15) DEVICE-BY-DEVICE DAY-OF STEPS
+============================================================
+Server PC:
+1. Connect to router LAN.
+2. Confirm static IP (example 192.168.1.100).
+3. Start Docker Desktop.
+4. Run start-platform.bat (zero registered teams by default).
+5. Keep one terminal open for docker compose ps and logs.
+
+Admin PC:
+1. Connect to same LAN.
+2. Open browser at http://SERVER_IP:4000.
+3. Add teams one-by-one using Team number and optional name.
+4. Verify each team row shows IP, Proxy, IDE port.
+5. Start/stop battle from here.
+
+Dashboard PC:
+1. Connect to same LAN.
+2. Open http://SERVER_IP:5000.
+3. Put browser in full-screen mode.
+4. Disable sleep/screensaver.
+
+Each Team PC (repeat x10):
+1. Connect to same LAN.
+2. Open assigned IDE URL only (Team N -> port 810(N-1)).
+3. Confirm attacker and defender files exist.
+4. Run bots and watch logs.
+
+Router:
+1. Ensure DHCP reservations/static IPs are active.
+2. Ensure no guest/client isolation for event LAN.
+3. Keep power stable (UPS recommended).
+
+END OF RUNBOOK

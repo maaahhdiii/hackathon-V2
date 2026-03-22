@@ -82,6 +82,12 @@ def team_url(team_ip: str, path: str) -> str:
     return f"http://{team_ip}{path}"
 
 
+def team_service_path(service_name: str, path: str) -> str:
+    normalized = service_name if service_name in SLOTS else "web"
+    suffix = path if path.startswith("/") else f"/{path}"
+    return f"/{normalized}{suffix}"
+
+
 def call_team(team_ip: str, method: str, path: str, payload: Dict[str, Any] = None, retries: int = 1) -> Any:
     payload = payload or {}
     for attempt in range(1, retries + 1):
@@ -110,7 +116,7 @@ def activate_service_vulns(service_name: str) -> None:
             call_team(
                 team_ip,
                 "POST",
-                "/flags/activate",
+                team_service_path(service_name, "/flags/activate"),
                 {"vuln": vuln, "secret": SECRET},
                 retries=3,
             )
@@ -123,7 +129,7 @@ def deactivate_service_vulns(service_name: str) -> None:
             call_team(
                 team_ip,
                 "POST",
-                "/flags/deactivate",
+                team_service_path(service_name, "/flags/deactivate"),
                 {"vuln": vuln, "secret": SECRET},
                 retries=3,
             )
@@ -284,12 +290,39 @@ def register():
     payload = request.get_json(silent=True) or {}
     team_name = str(payload.get("team_name", "")).strip()
     ip = str(payload.get("ip", "")).strip()
+    team_id = payload.get("team_id")
+    proxy_port = payload.get("proxy_port")
+    ide_port = payload.get("ide_port")
 
     if not team_name or not ip:
         return jsonify({"ok": False, "error": "team_name and ip are required"}), 400
 
+    if team_id is not None:
+        try:
+            team_id = int(team_id)
+        except (TypeError, ValueError):
+            return jsonify({"ok": False, "error": "team_id must be an integer"}), 400
+
+    if proxy_port is not None:
+        try:
+            proxy_port = int(proxy_port)
+        except (TypeError, ValueError):
+            return jsonify({"ok": False, "error": "proxy_port must be an integer"}), 400
+
+    if ide_port is not None:
+        try:
+            ide_port = int(ide_port)
+        except (TypeError, ValueError):
+            return jsonify({"ok": False, "error": "ide_port must be an integer"}), 400
+
     with state_lock:
-        teams[ip] = {"name": team_name, "registered_at": now_ts()}
+        teams[ip] = {
+            "name": team_name,
+            "registered_at": now_ts(),
+            "team_id": team_id,
+            "proxy_port": proxy_port,
+            "ide_port": ide_port,
+        }
         hp_store[ip] = {
             "web": MAX_HP["web"],
             "api": MAX_HP["api"],
@@ -299,7 +332,14 @@ def register():
         }
         overrides.setdefault(ip, {"score_override": None, "hp_override": {}})
 
-    return jsonify({"ok": True, "team_name": team_name, "ip": ip})
+    return jsonify({
+        "ok": True,
+        "team_name": team_name,
+        "ip": ip,
+        "team_id": team_id,
+        "proxy_port": proxy_port,
+        "ide_port": ide_port,
+    })
 
 
 @app.post("/battle/start")
@@ -382,7 +422,16 @@ def current():
 @app.get("/teams")
 def get_teams():
     with state_lock:
-        data = [{"ip": ip, "name": meta.get("name", ip)} for ip, meta in teams.items()]
+        data = [
+            {
+                "ip": ip,
+                "name": meta.get("name", ip),
+                "team_id": meta.get("team_id"),
+                "proxy_port": meta.get("proxy_port"),
+                "ide_port": meta.get("ide_port"),
+            }
+            for ip, meta in teams.items()
+        ]
     return jsonify({"teams": data})
 
 
@@ -436,7 +485,7 @@ def post_events():
         resp = call_team(
             target_team_ip,
             "POST",
-            "/damage",
+            team_service_path(target_service, "/damage"),
             {"amount": damage_amount, "secret": SECRET},
             retries=3,
         )
@@ -455,7 +504,7 @@ def post_events():
         resp = call_team(
             target_team_ip,
             "POST",
-            "/heal",
+            team_service_path(target_service, "/heal"),
             {"amount": heal_amount, "secret": SECRET},
             retries=2,
         )
@@ -504,8 +553,20 @@ def admin_set_hp():
         overrides[team_ip].setdefault("hp_override", {})[service] = hp_int
         hp_store[team_ip][service] = hp_int
 
-    call_team(team_ip, "POST", "/heal", {"amount": MAX_HP[service], "secret": SECRET}, retries=1)
-    call_team(team_ip, "POST", "/damage", {"amount": max(0, MAX_HP[service] - hp_int), "secret": SECRET}, retries=1)
+    call_team(
+        team_ip,
+        "POST",
+        team_service_path(service, "/heal"),
+        {"amount": MAX_HP[service], "secret": SECRET},
+        retries=1,
+    )
+    call_team(
+        team_ip,
+        "POST",
+        team_service_path(service, "/damage"),
+        {"amount": max(0, MAX_HP[service] - hp_int), "secret": SECRET},
+        retries=1,
+    )
 
     return jsonify({"ok": True})
 

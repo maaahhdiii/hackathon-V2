@@ -7,7 +7,7 @@ const SECRET = process.env.HACKATHON_SECRET || 'HACKATHON_SECRET_2025';
 async function activeService() {
   try {
     const r = await axios.get(`${ORCH}/current`, { timeout: 3000 });
-    return r.data.service || 'web';
+    return r.data.active_service || 'web';
   } catch (_) {
     return 'web';
   }
@@ -18,7 +18,7 @@ async function tick() {
   const service = await activeService();
   const vuln = vulns[Math.floor(Math.random() * vulns.length)];
   try {
-    const r = await axios.post(`${MY_TARGET}/attack`, {
+    const r = await axios.post(`${MY_TARGET}/${service}/attack`, {
       vulnerability_type: vuln,
       service,
       secret: SECRET,

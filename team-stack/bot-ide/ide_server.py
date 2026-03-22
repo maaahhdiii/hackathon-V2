@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import subprocess
 import threading
 from pathlib import Path
@@ -211,10 +212,24 @@ def context():
     for t in teams:
         team_id = t.get("team_id")
         proxy_port = t.get("proxy_port")
-        if team_id is None and isinstance(t.get("ip"), str):
-            team_id = str(t.get("ip"))
-        if proxy_port is None and isinstance(team_id, int):
+        ip_value = str(t.get("ip", ""))
+
+        if team_id is None and isinstance(t.get("name"), str):
+            name_match = re.search(r"(\d+)", t.get("name", ""))
+            if name_match:
+                team_id = int(name_match.group(1))
+
+        if team_id is None and ip_value:
+            ip_match = re.match(r"team(\d+)-proxy$", ip_value)
+            if ip_match:
+                team_id = int(ip_match.group(1))
+
+        if proxy_port is None and isinstance(team_id, int) and team_id >= 1:
             proxy_port = 9100 + (team_id - 1)
+
+        if team_id is None and ip_value:
+            team_id = ip_value
+
         normalized.append({"team_id": team_id, "name": t.get("name", t.get("team_name", "Team")), "proxy_port": proxy_port})
 
     enemy_targets = []

@@ -1,4 +1,5 @@
 import os
+import re
 import threading
 import logging
 
@@ -14,13 +15,27 @@ log = logging.getLogger("admin-dashboard")
 
 ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://127.0.0.1:9000").rstrip("/")
 SECRET = os.getenv("HACKATHON_SECRET", "HACKATHON_SECRET_2025")
+MAX_TEAMS = int(os.getenv("MAX_TEAMS", os.getenv("TEAM_SLOTS", "10")))
 
 
-def register_test_teams(count=10, ip_prefix="192.168.1.", ip_start=101, team_prefix="Team"):
+def team_runtime_info(team_no: int):
+    return {
+        "team_id": team_no,
+        "ip": f"team{team_no}-proxy",
+        "proxy_port": 9100 + (team_no - 1),
+        "ide_port": 8100 + (team_no - 1),
+        "name": f"Team {team_no}",
+    }
+
+
+def register_test_teams(count=10, ip_prefix="192.168.1.", ip_start=101, team_prefix="Team", register_mode="proxy_name"):
     results = []
     for idx in range(count):
         team_no = idx + 1
-        ip = f"{ip_prefix}{ip_start + idx}"
+        if register_mode == "proxy_name":
+            ip = f"team{team_no}-proxy"
+        else:
+            ip = f"{ip_prefix}{ip_start + idx}"
         payload = {
             "team_name": f"{team_prefix} {team_no}",
             "ip": ip,
@@ -83,10 +98,28 @@ def api_teams():
         merged = []
         for item in teams_data:
             ip = item.get("ip")
+            team_id = item.get("team_id")
+            proxy_port = item.get("proxy_port")
+            ide_port = item.get("ide_port")
+
+            if team_id is None and isinstance(ip, str):
+                match = re.match(r"team(\d+)-proxy$", ip)
+                if match:
+                    team_id = int(match.group(1))
+
+            if proxy_port is None and isinstance(team_id, int) and team_id >= 1:
+                proxy_port = 9100 + (team_id - 1)
+
+            if ide_port is None and isinstance(team_id, int) and team_id >= 1:
+                ide_port = 8100 + (team_id - 1)
+
             merged.append(
                 {
                     "ip": ip,
                     "name": item.get("name", ip),
+                    "team_id": team_id,
+                    "proxy_port": proxy_port,
+                    "ide_port": ide_port,
                     "hp": hp_data.get(ip, {}),
                     "score": scores_data.get(ip, {}),
                 }
@@ -178,9 +211,19 @@ def api_add_bulk_teams():
     ip_prefix = str(payload.get("ip_prefix", "192.168.1."))
     ip_start = int(payload.get("ip_start", 101))
     team_prefix = str(payload.get("team_prefix", "Team"))
+    register_mode = str(payload.get("register_mode", "proxy_name")).strip().lower()
+
+    if register_mode not in ("proxy_name", "ip"):
+        return jsonify({"ok": False, "error": "register_mode must be 'proxy_name' or 'ip'"}), 400
 
     count = max(1, min(50, count))
-    results = register_test_teams(count=count, ip_prefix=ip_prefix, ip_start=ip_start, team_prefix=team_prefix)
+    results = register_test_teams(
+        count=count,
+        ip_prefix=ip_prefix,
+        ip_start=ip_start,
+        team_prefix=team_prefix,
+        register_mode=register_mode,
+    )
     ok_count = sum(1 for item in results if item.get("ok"))
 
     return jsonify({
@@ -191,6 +234,40 @@ def api_add_bulk_teams():
     })
 
 
+@app.post("/api/teams/add_one")
+def api_add_one_team():
+    payload = request.get_json(silent=True) or {}
+
+    team_no = payload.get("team_no")
+    team_name = str(payload.get("team_name", "")).strip()
+
+    try:
+        team_no = int(team_no)
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "team_no must be an integer"}), 400
+
+    if team_no < 1 or team_no > MAX_TEAMS:
+        return jsonify({"ok": False, "error": f"team_no must be between 1 and {MAX_TEAMS}"}), 400
+
+    info = team_runtime_info(team_no)
+    payload_register = {
+        "team_name": team_name or info["name"],
+        "ip": info["ip"],
+        "team_id": info["team_id"],
+        "proxy_port": info["proxy_port"],
+        "ide_port": info["ide_port"],
+    }
+
+    try:
+        resp = requests.post(f"{ORCHESTRATOR_URL}/register", json=payload_register, timeout=5)
+        data = resp.json() if resp.content else {}
+        if not resp.ok:
+            return jsonify({"ok": False, "error": data.get("error", "register failed")}), resp.status_code
+        return jsonify({"ok": True, "team": payload_register})
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
 @app.post("/api/battle/hackathon_day_start")
 def api_hackathon_day_start():
     payload = request.get_json(silent=True) or {}
@@ -198,9 +275,19 @@ def api_hackathon_day_start():
     ip_prefix = str(payload.get("ip_prefix", "192.168.1."))
     ip_start = int(payload.get("ip_start", 101))
     team_prefix = str(payload.get("team_prefix", "Team"))
+    register_mode = str(payload.get("register_mode", "proxy_name")).strip().lower()
+
+    if register_mode not in ("proxy_name", "ip"):
+        return jsonify({"ok": False, "error": "register_mode must be 'proxy_name' or 'ip'"}), 400
 
     count = max(1, min(50, count))
-    register_results = register_test_teams(count=count, ip_prefix=ip_prefix, ip_start=ip_start, team_prefix=team_prefix)
+    register_results = register_test_teams(
+        count=count,
+        ip_prefix=ip_prefix,
+        ip_start=ip_start,
+        team_prefix=team_prefix,
+        register_mode=register_mode,
+    )
     ok_count = sum(1 for item in register_results if item.get("ok"))
 
     trigger_battle_start_async()

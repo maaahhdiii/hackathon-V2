@@ -180,6 +180,18 @@
       flex-wrap: wrap;
     }
 
+    .team-add {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .team-add input {
+      min-width: 120px;
+    }
+
     .btn {
       border: 1px solid transparent;
       color: #f4fbff;
@@ -446,8 +458,13 @@
       <div class="action-row">
         <button class="btn btn-start" id="startBtn">Start Battle</button>
         <button class="btn btn-stop" id="stopBtn">Stop Battle</button>
-        <button class="btn btn-add" id="addTeamsBtn">Add 10 Test Teams</button>
         <button class="btn btn-day" id="dayStartBtn">Hackathon Day Start</button>
+      </div>
+
+      <div class="team-add">
+        <input id="teamNoInput" type="number" min="1" max="10" placeholder="Team number (1-10)" />
+        <input id="teamNameInput" type="text" placeholder="Team name (optional)" />
+        <button class="btn btn-add" id="addTeamBtn">Add Team</button>
       </div>
     </div>
 
@@ -526,9 +543,31 @@
         const data = await fetchJson('/api/teams/add_bulk', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ count: 10, ip_prefix: '192.168.1.', ip_start: 101, team_prefix: 'Team' })
+          body: JSON.stringify({ count: 10, team_prefix: 'Team', register_mode: 'proxy_name' })
         });
         showToast(`Added ${data.registered}/${data.requested} teams`);
+        refreshTeamsAndEvents();
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function addOneTeam() {
+      const teamNo = Number(document.getElementById('teamNoInput').value);
+      const teamName = document.getElementById('teamNameInput').value.trim();
+
+      if (!Number.isInteger(teamNo) || teamNo < 1 || teamNo > 10) {
+        showToast('Team number must be between 1 and 10', false);
+        return;
+      }
+
+      try {
+        const data = await fetchJson('/api/teams/add_one', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ team_no: teamNo, team_name: teamName })
+        });
+        showToast(`Added ${data.team.name}`);
         refreshTeamsAndEvents();
       } catch (err) {
         showToast(err.message, false);
@@ -540,7 +579,7 @@
         const data = await fetchJson('/api/battle/hackathon_day_start', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ count: 10, ip_prefix: '192.168.1.', ip_start: 101, team_prefix: 'Team' })
+          body: JSON.stringify({ count: 10, team_prefix: 'Team', register_mode: 'proxy_name' })
         });
         showToast(`Day start queued: ${data.registered} teams`);
         refreshTeamsAndEvents();
@@ -630,6 +669,7 @@
             <span class="name" title="Rename" onclick="renameTeam('${team.ip}','${(team.name || '').replace(/'/g, "\\'")}')">${team.name}</span>
             <span class="ip">${team.ip}</span>
           </div>
+          <div class="ip">Team ID: ${team.team_id ?? '-'} | Proxy: ${team.proxy_port ?? '-'} | IDE: ${team.ide_port ?? '-'}</div>
           <div class="score">${Number(total).toFixed(1)}</div>
           <div class="hp-group">${hpRows}</div>
           <button class="controls-toggle" onclick="toggleControls('${team.ip}')">Manual Controls</button>
@@ -741,7 +781,7 @@
 
     document.getElementById('startBtn').addEventListener('click', startBattle);
     document.getElementById('stopBtn').addEventListener('click', stopBattle);
-    document.getElementById('addTeamsBtn').addEventListener('click', addBulkTeams);
+    document.getElementById('addTeamBtn').addEventListener('click', addOneTeam);
     document.getElementById('dayStartBtn').addEventListener('click', hackathonDayStart);
 
     window.renameTeam = renameTeam;

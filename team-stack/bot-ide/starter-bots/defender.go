@@ -21,7 +21,7 @@ func env(k, d string) string {
 func main() {
 	target := env("MY_TARGET", "http://localhost:9100")
 	vulns := []string{"sql_injection", "xss", "csrf", "rce", "auth_bypass"}
-	services := []string{"web", "dns", "mail"}
+	services := []string{"web", "api", "file", "db"}
 
 	fmt.Println("[defender.go] started")
 	for {
@@ -36,7 +36,7 @@ func main() {
 			"vulnerability_type": v,
 			"action":             a,
 		})
-		resp, err := http.Post(target+"/defend", "application/json", bytes.NewBuffer(body))
+		resp, err := http.Post(target+"/"+s+"/defend", "application/json", bytes.NewBuffer(body))
 		if err != nil {
 			fmt.Println("defend error:", err)
 		} else {

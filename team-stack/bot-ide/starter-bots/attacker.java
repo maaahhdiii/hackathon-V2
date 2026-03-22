@@ -1,5 +1,6 @@
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.Random;
 
@@ -8,7 +9,7 @@ public class attacker {
         String target = System.getenv().getOrDefault("MY_TARGET", "http://localhost:9100");
         String secret = System.getenv().getOrDefault("HACKATHON_SECRET", "HACKATHON_SECRET_2025");
         String[] vulns = {"sql_injection", "xss", "csrf", "rce", "auth_bypass"};
-        String[] services = {"web", "dns", "mail"};
+        String[] services = {"web", "api", "file", "db"};
         Random rnd = new Random();
 
         System.out.println("[attacker.java] started");
@@ -18,7 +19,7 @@ public class attacker {
             String body = String.format("{\"vulnerability_type\":\"%s\",\"service\":\"%s\",\"secret\":\"%s\"}", vuln, service, secret);
 
             try {
-                URL url = new URL(target + "/attack");
+                URL url = URI.create(target + "/" + service + "/attack").toURL();
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");

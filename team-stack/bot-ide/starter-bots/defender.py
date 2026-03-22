@@ -10,12 +10,12 @@ MY_TARGET = os.getenv("MY_TARGET", "http://localhost:9100")
 def main():
     print("[defender.py] started")
     while True:
-        service = random.choice(["web", "dns", "mail"])
+        service = random.choice(["web", "api", "file", "db"])
         action = random.choice(["enable", "disable"])
         vuln = random.choice(["sql_injection", "xss", "csrf", "rce", "auth_bypass"])
         payload = {"service": service, "vulnerability_type": vuln, "action": action}
         try:
-            r = requests.post(f"{MY_TARGET}/defend", json=payload, timeout=5)
+            r = requests.post(f"{MY_TARGET}/{service}/defend", json=payload, timeout=5)
             print(f"defend {service}/{vuln}/{action} -> {r.status_code} {r.text[:120]}")
         except Exception as exc:
             print(f"defend error: {exc}")

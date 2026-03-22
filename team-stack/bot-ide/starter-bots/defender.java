@@ -1,5 +1,6 @@
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.Random;
 
@@ -7,7 +8,7 @@ public class defender {
     public static void main(String[] args) throws Exception {
         String target = System.getenv().getOrDefault("MY_TARGET", "http://localhost:9100");
         String[] vulns = {"sql_injection", "xss", "csrf", "rce", "auth_bypass"};
-        String[] services = {"web", "dns", "mail"};
+        String[] services = {"web", "api", "file", "db"};
         Random rnd = new Random();
 
         System.out.println("[defender.java] started");
@@ -18,7 +19,7 @@ public class defender {
             String body = String.format("{\"service\":\"%s\",\"vulnerability_type\":\"%s\",\"action\":\"%s\"}", service, vuln, action);
 
             try {
-                URL url = new URL(target + "/defend");
+                URL url = URI.create(target + "/" + service + "/defend").toURL();
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");

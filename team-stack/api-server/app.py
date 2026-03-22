@@ -27,6 +27,14 @@ vulnerabilities = {
     "idor": False,
 }
 
+VULN_ALIAS = {
+    "sql_injection": "idor",
+    "xss": "insecure_ep",
+    "csrf": "insecure_ep",
+    "rce": "cmd_inject",
+    "auth_bypass": "insecure_ep",
+}
+
 users = [
     {"id": 1, "name": "alice", "email": "alice@example.com", "role": "user"},
     {"id": 2, "name": "bob", "email": "bob@example.com", "role": "admin"},
@@ -74,6 +82,14 @@ def apply_heal(amount: int) -> int:
     with state_lock:
         current_hp = min(MAX_HP, current_hp + max(0, int(amount)))
         return current_hp
+
+
+def normalize_vuln(vuln: str) -> str:
+    key = str(vuln or "").strip().lower()
+    key = VULN_ALIAS.get(key, key)
+    if key in vulnerabilities:
+        return key
+    return "insecure_ep"
 
 
 def get_user(user_id: int):
@@ -150,6 +166,35 @@ def heal():
         return jsonify({"ok": False, "error": "unauthorized"}), 401
     hp_value = apply_heal(int(payload.get("amount", 0)))
     return jsonify({"ok": True, "hp": hp_value})
+
+
+@app.post("/attack")
+def attack():
+    payload = request.get_json(silent=True) or {}
+    vuln = normalize_vuln(payload.get("vulnerability_type") or payload.get("vuln"))
+    amount = int(payload.get("amount", 8))
+
+    with state_lock:
+        is_active = vulnerabilities.get(vuln, False)
+
+    if not is_active:
+        return jsonify({"ok": True, "success": False, "reason": "vulnerability not active", "vuln": vuln, "hp": current_hp})
+
+    hp_value = apply_damage(amount)
+    return jsonify({"ok": True, "success": True, "vuln": vuln, "hp": hp_value})
+
+
+@app.post("/defend")
+def defend():
+    payload = request.get_json(silent=True) or {}
+    vuln = normalize_vuln(payload.get("vulnerability_type") or payload.get("vuln"))
+    action = str(payload.get("action", "enable")).strip().lower()
+    enabled = action == "enable"
+
+    with state_lock:
+        vulnerabilities[vuln] = enabled
+
+    return jsonify({"ok": True, "vuln": vuln, "active": enabled})
 
 
 @app.get("/users")
