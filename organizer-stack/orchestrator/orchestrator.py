@@ -39,6 +39,7 @@ battle_started = False
 battle_finished = False
 battle_start_time = None
 slot_start_time = None
+battle_stop_time = None
 
 teams: Dict[str, Dict[str, Any]] = {}
 hp_store: Dict[str, Dict[str, Any]] = {}
@@ -344,9 +345,12 @@ def register():
 
 @app.post("/battle/start")
 def battle_start():
-    global battle_started, battle_finished, battle_start_time, slot_start_time, current_slot
+    global battle_started, battle_finished, battle_start_time, slot_start_time, current_slot, battle_stop_time
 
     with state_lock:
+        if not teams:
+            return jsonify({"ok": False, "error": "no teams registered"}), 400
+
         registered = dict(teams)
         reset_runtime_state()
         teams.update(registered)
@@ -365,6 +369,7 @@ def battle_start():
         current_slot = 0
         battle_start_time = now_ts()
         slot_start_time = battle_start_time
+        battle_stop_time = None
 
     activate_service_vulns(SLOTS[current_slot])
     schedule_rotation()
@@ -379,10 +384,13 @@ def battle_start():
 
 @app.post("/battle/stop")
 def battle_stop():
-    global battle_started, battle_finished
+    global battle_started, battle_finished, battle_stop_time
     with state_lock:
+        if not battle_started:
+            return jsonify({"ok": True, "message": "battle already stopped", "final_scores": compute_scores()})
         battle_started = False
         battle_finished = True
+        battle_stop_time = now_ts()
     stop_rotation()
     final_scores = compute_scores()
     return jsonify({"ok": True, "final_scores": final_scores})
@@ -396,13 +404,15 @@ def current():
         slot_idx = current_slot
         started_at = battle_start_time
         slot_at = slot_start_time
+        stopped_at = battle_stop_time
         teams_count = len(teams)
 
     now = now_ts()
-    elapsed_slot = 0 if not slot_at else max(0, now - slot_at)
-    remaining_slot = 0 if finished else max(0, SLOT_DURATION - elapsed_slot)
-    battle_elapsed = 0 if not started_at else max(0, now - started_at)
-    battle_remaining = 0 if finished else max(0, BATTLE_DURATION - battle_elapsed)
+    ref_time = now if started else (stopped_at or now)
+    elapsed_slot = 0 if not slot_at else max(0, ref_time - slot_at)
+    remaining_slot = max(0, SLOT_DURATION - elapsed_slot) if started and not finished else 0
+    battle_elapsed = 0 if not started_at else max(0, ref_time - started_at)
+    battle_remaining = max(0, BATTLE_DURATION - battle_elapsed) if started and not finished else 0
 
     return jsonify(
         {
@@ -651,11 +661,11 @@ def stream():
                     "battle_started": battle_started,
                     "battle_finished": battle_finished,
                     "active_service": SLOTS[current_slot],
-                    "remaining_seconds": max(0, SLOT_DURATION - (now_ts() - slot_start_time)) if slot_start_time else SLOT_DURATION,
+                    "remaining_seconds": max(0, SLOT_DURATION - (now_ts() - slot_start_time)) if (battle_started and not battle_finished and slot_start_time) else 0,
                     "teams": local_teams,
                     "recent_events": events[-10:],
-                    "battle_elapsed": max(0, now_ts() - battle_start_time) if battle_start_time else 0,
-                    "battle_remaining": max(0, BATTLE_DURATION - (now_ts() - battle_start_time)) if battle_start_time else BATTLE_DURATION,
+                    "battle_elapsed": max(0, now_ts() - battle_start_time) if (battle_started and battle_start_time) else 0,
+                    "battle_remaining": max(0, BATTLE_DURATION - (now_ts() - battle_start_time)) if (battle_started and battle_start_time) else 0,
                 }
 
             yield f"data: {json.dumps(payload)}\n\n"

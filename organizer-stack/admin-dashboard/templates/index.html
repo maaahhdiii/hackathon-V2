@@ -490,6 +490,7 @@
     const countdownEl = document.getElementById('countdown');
 
     let latestTeams = [];
+    const openControls = new Set();
 
     function showToast(message, ok = true) {
       toastEl.textContent = message;
@@ -567,8 +568,10 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ team_no: teamNo, team_name: teamName })
         });
-        showToast(`Added ${data.team.name}`);
-        refreshTeamsAndEvents();
+        const newIp = data?.team?.ip;
+        if (newIp) openControls.add(newIp);
+        showToast(`Added ${data?.team?.team_name || data?.team?.name || ('Team ' + teamNo)}`);
+        await refreshTeamsAndEvents();
       } catch (err) {
         showToast(err.message, false);
       }
@@ -579,7 +582,7 @@
         const data = await fetchJson('/api/battle/hackathon_day_start', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ count: 10, team_prefix: 'Team', register_mode: 'proxy_name' })
+          body: JSON.stringify({ count: 0, team_prefix: 'Team', register_mode: 'proxy_name' })
         });
         showToast(`Day start queued: ${data.registered} teams`);
         refreshTeamsAndEvents();
@@ -607,6 +610,7 @@
       if (!confirm(`Remove team ${ip}?`)) return;
       try {
         await fetchJson(`/api/teams/${encodeURIComponent(ip)}`, { method: 'DELETE' });
+        openControls.delete(ip);
         showToast('Team removed');
       } catch (err) {
         showToast(err.message, false);
@@ -673,7 +677,7 @@
           <div class="score">${Number(total).toFixed(1)}</div>
           <div class="hp-group">${hpRows}</div>
           <button class="controls-toggle" onclick="toggleControls('${team.ip}')">Manual Controls</button>
-          <div id="ctrl-${team.ip}" class="controls">
+          <div id="ctrl-${team.ip}" class="controls ${openControls.has(team.ip) ? 'open' : ''}">
             <div class="inline">
               <select id="svc-${team.ip}">
                 <option value="web">web</option>
@@ -701,6 +705,11 @@
       const el = document.getElementById(`ctrl-${ip}`);
       if (!el) return;
       el.classList.toggle('open');
+      if (el.classList.contains('open')) {
+        openControls.add(ip);
+      } else {
+        openControls.delete(ip);
+      }
     }
 
     function renderEvents(events) {

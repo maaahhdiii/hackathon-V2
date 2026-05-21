@@ -18,6 +18,7 @@ ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://orchestrator:9000")
 SECRET = os.getenv("HACKATHON_SECRET", "HACKATHON_SECRET_2025")
 MY_PROXY_PORT = os.getenv("MY_PROXY_PORT", "9100")
 SERVER_IP = os.getenv("SERVER_IP", "192.168.1.100")
+MY_PROXY_INTERNAL = os.getenv("MY_PROXY_INTERNAL", f"http://team{TEAM_ID}-proxy")
 WORKSPACE = Path("/app/workspace")
 
 processes = {"attacker": None, "defender": None}
@@ -40,7 +41,7 @@ def _cpp_cmd(path: str):
 
 
 LANGUAGE_RUNNERS = {
-    "py": lambda f: ["python3", f],
+    "py": lambda f: ["python3", "-u", f],
     "js": lambda f: ["node", f],
     "go": lambda f: ["go", "run", f],
     "java": _java_cmd,
@@ -145,6 +146,7 @@ def run_bot(bot_name):
         return jsonify({"error": f"unsupported extension: {ext}"}), 400
 
     env = os.environ.copy()
+    my_target_external = f"http://{SERVER_IP}:{MY_PROXY_PORT}"
     env.update(
         {
             "ORCHESTRATOR_URL": ORCHESTRATOR_URL,
@@ -153,7 +155,9 @@ def run_bot(bot_name):
             "SERVER_IP": SERVER_IP,
             "TEAM_ID": TEAM_ID,
             "TEAM_NAME": TEAM_NAME,
-            "MY_TARGET": f"http://{SERVER_IP}:{MY_PROXY_PORT}",
+            "MY_TARGET": MY_PROXY_INTERNAL,
+            "MY_TARGET_INTERNAL": MY_PROXY_INTERNAL,
+            "MY_TARGET_EXTERNAL": my_target_external,
             "ORCH": ORCHESTRATOR_URL,
         }
     )
@@ -233,23 +237,29 @@ def context():
         normalized.append({"team_id": team_id, "name": t.get("name", t.get("team_name", "Team")), "proxy_port": proxy_port})
 
     enemy_targets = []
+    enemy_targets_external = []
     for t in normalized:
         port = t.get("proxy_port")
+        team_id = t.get("team_id")
         if port is None:
             continue
-        if str(t.get("team_id")) == str(TEAM_ID):
+        if str(team_id) == str(TEAM_ID):
             continue
-        enemy_targets.append(f"http://{SERVER_IP}:{port}")
+        enemy_targets_external.append(f"http://{SERVER_IP}:{port}")
+        if isinstance(team_id, int) and team_id >= 1:
+            enemy_targets.append(f"http://team{team_id}-proxy")
 
     return jsonify(
         {
             "team_id": TEAM_ID,
             "team_name": TEAM_NAME,
             "my_proxy": f"http://{SERVER_IP}:{MY_PROXY_PORT}",
+            "my_proxy_internal": MY_PROXY_INTERNAL,
             "orchestrator": ORCHESTRATOR_URL,
             "server_ip": SERVER_IP,
             "all_teams": normalized,
             "enemy_targets": enemy_targets,
+            "enemy_targets_external": enemy_targets_external,
             "active_service_url": f"{ORCHESTRATOR_URL}/current",
             "events_url": f"{ORCHESTRATOR_URL}/events",
         }

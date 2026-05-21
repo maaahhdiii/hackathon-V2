@@ -1,0 +1,1549 @@
+Starting platform from "D:\hckathoun V2\hackathon\organizer-stack" with 10 team(s)...
+#1 [internal] load local bake definitions
+#1 reading from stdin 31.47kB 0.1s done
+#1 DONE 0.1s
+
+#2 [team10-proxy internal] load build definition from Dockerfile
+#2 ...
+
+#3 [tournament-display internal] load build definition from Dockerfile
+#3 transferring dockerfile: 212B 0.0s done
+#3 DONE 0.1s
+
+#2 [team9-proxy internal] load build definition from Dockerfile
+#2 transferring dockerfile: 201B 0.1s done
+#2 DONE 0.2s
+
+#4 [orchestrator internal] load build definition from Dockerfile
+#4 transferring dockerfile: 221B 0.0s done
+#4 DONE 0.1s
+
+#5 [team3-api internal] load build definition from Dockerfile
+#5 transferring dockerfile: 212B 0.0s done
+#5 DONE 0.2s
+
+#6 [team10-web internal] load build definition from Dockerfile
+#6 transferring dockerfile: 212B 0.0s done
+#6 DONE 0.2s
+
+#7 [team10-db internal] load build definition from Dockerfile
+#7 transferring dockerfile: 212B 0.1s done
+#7 DONE 0.2s
+
+#8 [team10-ide internal] load build definition from Dockerfile
+#8 transferring dockerfile: 675B 0.1s done
+#8 DONE 0.2s
+
+#9 [team9-file internal] load build definition from Dockerfile
+#9 transferring dockerfile: 212B 0.1s done
+#9 DONE 0.2s
+
+#10 [admin-dashboard internal] load build definition from Dockerfile
+#10 transferring dockerfile: 212B 0.0s done
+#10 DONE 0.2s
+
+#11 [team1-file internal] load metadata for docker.io/library/python:3.11-slim
+#11 DONE 1.4s
+
+#12 [team4-proxy internal] load metadata for docker.io/library/nginx:alpine
+#12 DONE 1.3s
+
+#13 [team2-ide internal] load metadata for docker.io/library/ubuntu:22.04
+#13 DONE 1.3s
+
+#14 [orchestrator internal] load .dockerignore
+#14 transferring context: 2B done
+#14 DONE 0.1s
+
+#15 [team8-proxy internal] load .dockerignore
+#15 transferring context: 2B 0.0s done
+#15 DONE 0.1s
+
+#16 [team7-ide internal] load .dockerignore
+#16 transferring context: 2B done
+#16 DONE 0.1s
+
+#17 [team7-proxy internal] load build context
+#17 DONE 0.0s
+
+#18 [admin-dashboard internal] load .dockerignore
+#18 transferring context: 2B done
+#18 DONE 0.1s
+
+#19 [team7-web internal] load .dockerignore
+#19 transferring context: 2B done
+#19 DONE 0.1s
+
+#20 [team6-ide internal] load build context
+#20 DONE 0.0s
+
+#21 [team3-web internal] load build context
+#21 DONE 0.0s
+
+#22 [team10-db internal] load .dockerignore
+#22 transferring context: 2B done
+#22 DONE 0.1s
+
+#23 [team6-ide  1/10] FROM docker.io/library/ubuntu:22.04@sha256:eb29ed27b0821dca09c2e28b39135e185fc1302036427d5f4d70a41ce8fd7659
+#23 resolve docker.io/library/ubuntu:22.04@sha256:eb29ed27b0821dca09c2e28b39135e185fc1302036427d5f4d70a41ce8fd7659
+#23 resolve docker.io/library/ubuntu:22.04@sha256:eb29ed27b0821dca09c2e28b39135e185fc1302036427d5f4d70a41ce8fd7659 0.1s done
+#23 DONE 0.1s
+
+#24 [team8-file internal] load .dockerignore
+#24 transferring context: 2B done
+#24 DONE 0.1s
+
+#25 [tournament-display internal] load .dockerignore
+#25 transferring context: 2B done
+#25 DONE 0.1s
+
+#26 [team8-api internal] load .dockerignore
+#26 transferring context: 2B done
+#26 DONE 0.1s
+
+#27 [admin-dashboard internal] load build context
+#27 transferring context: 164B done
+#27 DONE 0.0s
+
+#28 [team1-proxy 1/4] FROM docker.io/library/nginx:alpine@sha256:9c5e088b4dababb9fb4a2523bdddf74fd32c0ed748226ac71094ba599681a33d
+#28 resolve docker.io/library/nginx:alpine@sha256:9c5e088b4dababb9fb4a2523bdddf74fd32c0ed748226ac71094ba599681a33d 0.1s done
+#28 DONE 0.1s
+
+#29 [orchestrator internal] load build context
+#29 transferring context: 103B done
+#29 DONE 0.1s
+
+#30 [team5-web 1/5] FROM docker.io/library/python:3.11-slim@sha256:b1b81d67b8df73bf6067191790c233ef9e598b863fc1ccf447956138ca466d99
+#30 resolve docker.io/library/python:3.11-slim@sha256:b1b81d67b8df73bf6067191790c233ef9e598b863fc1ccf447956138ca466d99 0.1s done
+#30 DONE 0.1s
+
+#21 [team10-web internal] load build context
+#21 transferring context: 22.24kB 0.0s done
+#21 DONE 0.1s
+
+#31 [team4-db internal] load build context
+#31 transferring context: 13.03kB done
+#31 DONE 0.1s
+
+#32 [tournament-display internal] load build context
+#32 transferring context: 164B done
+#32 DONE 0.1s
+
+#33 [team5-api internal] load build context
+#33 transferring context: 93B done
+#33 DONE 0.1s
+
+#34 [team5-file internal] load build context
+#34 transferring context: 12.52kB 0.0s done
+#34 DONE 0.1s
+
+#35 [orchestrator 3/5] COPY requirements.txt .
+#35 CACHED
+
+#36 [orchestrator 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#36 CACHED
+
+#37 [orchestrator 5/5] COPY . .
+#37 CACHED
+
+#38 [admin-dashboard 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#38 CACHED
+
+#39 [admin-dashboard 3/5] COPY requirements.txt .
+#39 CACHED
+
+#40 [admin-dashboard 5/5] COPY . .
+#40 CACHED
+
+#41 [tournament-display 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#41 CACHED
+
+#42 [tournament-display 3/5] COPY requirements.txt .
+#42 CACHED
+
+#43 [team10-web 3/5] COPY requirements.txt .
+#43 CACHED
+
+#44 [team10-web 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#44 CACHED
+
+#45 [team10-web 5/5] COPY . .
+#45 CACHED
+
+#46 [tournament-display 5/5] COPY . .
+#46 CACHED
+
+#47 [team2-file 3/5] COPY requirements.txt .
+#47 CACHED
+
+#48 [team2-file 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#48 CACHED
+
+#49 [team2-file 5/5] COPY . .
+#49 CACHED
+
+#50 [team9-db 3/5] COPY requirements.txt .
+#50 CACHED
+
+#51 [team9-db 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#51 CACHED
+
+#52 [orchestrator 2/5] WORKDIR /app
+#52 CACHED
+
+#53 [team3-api 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#53 CACHED
+
+#54 [team3-api 3/5] COPY requirements.txt .
+#54 CACHED
+
+#55 [team2-db 5/5] COPY . .
+#55 CACHED
+
+#56 [team4-api 5/5] COPY . .
+#56 CACHED
+
+#17 [team2-proxy internal] load build context
+#17 transferring context: 1.97kB 0.0s done
+#17 DONE 0.0s
+
+#57 [team10-web] exporting to image
+#57 exporting layers
+#57 ...
+
+#58 [team7-proxy 3/4] COPY entrypoint.sh /entrypoint.sh
+#58 CACHED
+
+#59 [team7-proxy 2/4] COPY nginx.conf /etc/nginx/conf.d/default.conf
+#59 CACHED
+
+#60 [team4-proxy 4/4] RUN chmod +x /entrypoint.sh
+#60 CACHED
+
+#20 [team6-ide internal] load build context
+#20 transferring context: 36.42kB 0.0s done
+#20 DONE 0.2s
+
+#57 [team10-web] exporting to image
+#57 exporting layers done
+#57 exporting manifest sha256:39b8bd00574bdb911af0aa9e53dfbf4c3a1cfff0b3e60bf107bfc038b3515170
+#57 ...
+
+#61 [team8-ide  3/10] RUN pip3 install requests flask flask-cors beautifulsoup4 colorama
+#61 CACHED
+
+#62 [team8-ide  8/10] COPY . .
+#62 CACHED
+
+#63 [team8-ide  5/10] WORKDIR /app
+#63 CACHED
+
+#64 [team8-ide  2/10] RUN apt-get update && apt-get install -y     python3 python3-pip python3-venv     nodejs npm     golang-go     default-jdk     gcc g++ make     curl wget git     bash     && rm -rf /var/lib/apt/lists/*
+#64 CACHED
+
+#65 [team8-ide  6/10] COPY requirements.txt .
+#65 CACHED
+
+#66 [team8-ide  4/10] RUN npm install -g axios node-fetch
+#66 CACHED
+
+#67 [team8-ide  9/10] RUN mkdir -p /app/workspace
+#67 CACHED
+
+#68 [team8-ide  7/10] RUN pip3 install -r requirements.txt --no-cache-dir
+#68 CACHED
+
+#69 [team10-ide 10/10] RUN cp starter-bots/* /app/workspace/ 2>/dev/null || true
+#69 CACHED
+
+#57 [team10-web] exporting to image
+#57 exporting manifest sha256:39b8bd00574bdb911af0aa9e53dfbf4c3a1cfff0b3e60bf107bfc038b3515170 0.1s done
+#57 exporting config sha256:9fd2d952c56d5ecf2f600406c8b52f7a585a258c6ab1f70348d6b0c54f2fc6d6
+#57 exporting config sha256:9fd2d952c56d5ecf2f600406c8b52f7a585a258c6ab1f70348d6b0c54f2fc6d6 0.1s done
+#57 exporting attestation manifest sha256:f7e51fa8a7a9711c7de1e87fa87a5235da160df0e883affde1134b1f6adc4e70
+#57 exporting attestation manifest sha256:f7e51fa8a7a9711c7de1e87fa87a5235da160df0e883affde1134b1f6adc4e70 1.7s done
+#57 exporting manifest list sha256:16e0a0f670c92e9ba54580d477ee76d2a220fef5d11f3258d758a5e978e7b3ca
+#57 ...
+
+#70 [team10-file] exporting to image
+#70 exporting layers done
+#70 exporting manifest sha256:36e4bc7e55896aff4bec3ec08d6fe369551d6d9bf082ff65fa73cc5202a1e474 0.1s done
+#70 exporting config sha256:2391d04883388543f3e6ff8571ce2e03d288df4f70e998037097520c3b84b91d 0.0s done
+#70 exporting attestation manifest sha256:ef27d4365334c8fe0af92e6e87441e871dc4c24b6d6de227312fe381a3a6e607 1.3s done
+#70 exporting manifest list sha256:16a4ecff24fa35e453cbb8e0a33f125dfb97837df71a70d809bf2b85a5c82171 1.0s done
+#70 naming to docker.io/library/organizer-stack-team10-file:latest 0.3s done
+#70 unpacking to docker.io/library/organizer-stack-team10-file:latest 0.4s done
+#70 DONE 3.4s
+
+#71 [orchestrator] exporting to image
+#71 exporting layers done
+#71 exporting manifest sha256:c7509b295f4a95663069c3ec0ce608c989e9864ef3d78c3af57994ce757137d3 0.1s done
+#71 exporting config sha256:057741867070bd9ad523c403f70edf40c7ce55115a679bc5f0990b37f7650317 0.0s done
+#71 exporting attestation manifest sha256:5c9847de8e99a390f0323db39c6609d4c8dce88cb4f1eb02b5ec64d267182193 1.7s done
+#71 exporting manifest list sha256:4064b3b0370bd33c0ce38704475cb0adb3b512b5591b977b08ec1064d1981153 0.9s done
+#71 naming to docker.io/library/organizer-stack-orchestrator:latest 0.3s done
+#71 unpacking to docker.io/library/organizer-stack-orchestrator:latest
+#71 ...
+
+#72 [team5-api] exporting to image
+#72 exporting layers done
+#72 exporting manifest sha256:ffa90d4df5e2e67029f1bed760a09ab2e8194deb4cd2dbe6ea9092ef1012b5e8 0.1s done
+#72 exporting config sha256:cd4af46b2b8ee95564585642dc0b37bb4e3663230eff16bf2fa32acd2eb8f342 0.0s done
+#72 exporting attestation manifest sha256:76072aaa5d6e979fc144e663d78341cd8e192383fc6cfb599c16ddcee48ca81c 1.5s done
+#72 exporting manifest list sha256:2face6825fe60f5b9e024f76bddb88f78a9824ad9508081dc649d87f46f4e009 0.9s done
+#72 naming to docker.io/library/organizer-stack-team5-api:latest 0.3s done
+#72 unpacking to docker.io/library/organizer-stack-team5-api:latest 0.4s done
+#72 DONE 3.6s
+
+#71 [orchestrator] exporting to image
+#71 unpacking to docker.io/library/organizer-stack-orchestrator:latest 0.4s done
+#71 DONE 3.7s
+
+#73 [team4-api] exporting to image
+#73 exporting layers done
+#73 exporting manifest sha256:3d1a7db55c7555666f2b4b9165b352c8f8a6dd8be3e8b7d7ed266018941ab3c2 0.1s done
+#73 exporting config sha256:ecc4ff3d847a3d1b9690bf8d8fcd0d180d6a68109543940c9eb5e143bdb3e22c 0.0s done
+#73 exporting attestation manifest sha256:61b27d8d17587bff4985dc0bdeb26b9988afa863ceeda80ffefed5816300c9ed 1.7s done
+#73 exporting manifest list sha256:3830db7872a33859d2a66508e13c12be458b6d83fac39db2001ab481717154c9 0.9s done
+#73 naming to docker.io/library/organizer-stack-team4-api:latest 0.3s done
+#73 unpacking to docker.io/library/organizer-stack-team4-api:latest 0.4s done
+#73 DONE 3.7s
+
+#57 [team10-web] exporting to image
+#57 exporting manifest list sha256:16e0a0f670c92e9ba54580d477ee76d2a220fef5d11f3258d758a5e978e7b3ca 0.8s done
+#57 naming to docker.io/library/organizer-stack-team10-web:latest
+#57 naming to docker.io/library/organizer-stack-team10-web:latest 0.3s done
+#57 unpacking to docker.io/library/organizer-stack-team10-web:latest
+#57 ...
+
+#74 [team7-file] exporting to image
+#74 exporting layers done
+#74 exporting manifest sha256:c16e6c220a30e0e65ba18932c1b50ea849d4fe7a219aaa65ede0e2aa40bed8ce 0.1s done
+#74 exporting config sha256:e4d94a76f90c1b5abfec35e9855b657fb9ab1d5555d301d311cf279057a75b8d 0.0s done
+#74 exporting attestation manifest sha256:06ebdc1363fc953ebc49df860820d55a0239d9079cebb7021c06372ffb111df4 2.0s done
+#74 exporting manifest list sha256:258f7c7e99a2ff398aaa3a1ab9e2fb9d61b7f8f29823ca2ecb1eb2c9077fb879 0.7s done
+#74 naming to docker.io/library/organizer-stack-team7-file:latest 0.4s done
+#74 unpacking to docker.io/library/organizer-stack-team7-file:latest 0.3s done
+#74 DONE 4.0s
+
+#75 [team2-web] exporting to image
+#75 exporting layers done
+#75 exporting manifest sha256:ee5990585688199c97e797ecbef6605906b432f5ae81a2e06ef0854d5da8574f 0.1s done
+#75 exporting config sha256:d0a0510ab6440d7fefba8f5bf88fb86a1001acc672be2becda8b3c0d05f0023b 0.0s done
+#75 exporting attestation manifest sha256:e9b77b216c7e0ea1283145570c97f55e1ac53fdeb827292420259cf6ba867b09 2.0s done
+#75 exporting manifest list sha256:cc460510dfba78452f75547e2f2f6523070410ad4eeaaa3877b959b2d7c8453f 0.7s done
+#75 naming to docker.io/library/organizer-stack-team2-web:latest 0.4s done
+#75 unpacking to docker.io/library/organizer-stack-team2-web:latest 0.3s done
+#75 DONE 4.0s
+
+#76 [team8-file] exporting to image
+#76 exporting layers done
+#76 exporting manifest sha256:89842777676ac26eb530647e3d06771dcbb968699fc1999127f4d5ed57403407 0.1s done
+#76 exporting config sha256:c406a159c388f166cc99cf87bfcf92e5452dab7e7c5c1927bf2d57eb21da6df4 0.1s done
+#76 exporting attestation manifest sha256:d1a4fefa0df86c8c481557e9040209d394fd17d646bfe2713c602b845888d289 1.5s done
+#76 exporting manifest list sha256:4fcb3e7dd94a6a0e6b1ed5237eda327058dca9f1bebdfd360b46aa50ba505022 0.7s done
+#76 naming to docker.io/library/organizer-stack-team8-file:latest 0.4s done
+#76 unpacking to docker.io/library/organizer-stack-team8-file:latest 0.3s done
+#76 DONE 4.0s
+
+#77 [team6-web] exporting to image
+#77 exporting layers done
+#77 exporting manifest sha256:65de2c7058cf81aaa609f987c4c1873105ca0c1c975fb081229105331781ba82 0.0s done
+#77 exporting config sha256:0655c922f832f16f808914e1a7871cbfa87624cdcab8fd6f9caf73e3767dc589 0.2s done
+#77 exporting attestation manifest sha256:6f2fd5f1f89a7df39fddc0a28cfc86f62d4284843d4ab6a7fe2ada6f5748cf83 1.7s done
+#77 exporting manifest list sha256:c85d2b22ace0dbac83c10e13accb843a9a8151158e9e654049142679336d6c62 0.7s done
+#77 naming to docker.io/library/organizer-stack-team6-web:latest 0.4s done
+#77 unpacking to docker.io/library/organizer-stack-team6-web:latest 0.3s done
+#77 DONE 4.0s
+
+#78 [admin-dashboard] exporting to image
+#78 exporting layers done
+#78 exporting manifest sha256:fbf77afae6969b5b98aaebf432367e3ed3af1f13380d1885b857b80599483548 0.1s done
+#78 exporting config sha256:c81faab9a473be62e9737fc2b83ddc9d5e996d5f3270d7f06327797a50569639 0.1s done
+#78 exporting attestation manifest sha256:c9d56f506bc8f0ed0a6c199d30ccff60491887b801a023438fb60a072952b720 1.6s done
+#78 exporting manifest list sha256:b4b7ac0cbbc702902bcd2ded290d5a83fd73965a044f1256fc23d386234805aa 0.7s done
+#78 naming to docker.io/library/organizer-stack-admin-dashboard:latest 0.4s done
+#78 unpacking to docker.io/library/organizer-stack-admin-dashboard:latest 0.3s done
+#78 DONE 4.0s
+
+#79 [team10-db] exporting to image
+#79 exporting layers done
+#79 exporting manifest sha256:d362614824e87245230eb7fb2227a6a7830d833cdf0a66b532e1c10eb8005b2e 0.0s done
+#79 exporting config sha256:252570791a977203e130effab76b004d03037243197ba8ffe547d99c2695a46d 0.2s done
+#79 exporting attestation manifest sha256:c5634f84d4ee53c9e352abef1a1b457ca2941955d844134c005475df976e7a58 1.7s done
+#79 exporting manifest list sha256:d291f772fd4656e86dee6c7bf9354268bfbe665646f1d2b455f5085e2f591af3 0.7s done
+#79 naming to docker.io/library/organizer-stack-team10-db:latest 0.4s done
+#79 unpacking to docker.io/library/organizer-stack-team10-db:latest 0.3s done
+#79 DONE 3.9s
+
+#80 [team9-web] exporting to image
+#80 exporting layers done
+#80 exporting manifest sha256:1dbbaedc31c027a610140f7244322f7ca25aa40c692d0e0303386f6874bde25e 0.0s done
+#80 exporting config sha256:41e278261c56f6213828487702e8e2deffbd3fcc737c3f14e87460a893491fa3 0.2s done
+#80 exporting attestation manifest sha256:4199de2308d12d1895bcf4948dd3b8045aea85674c96eb8082e4f7562719bb8c 1.7s done
+#80 exporting manifest list sha256:6b2dd611a431efabedd98703fbff052302869f2cf5ef7979561e77969e41e0c9 0.7s done
+#80 naming to docker.io/library/organizer-stack-team9-web:latest 0.4s done
+#80 unpacking to docker.io/library/organizer-stack-team9-web:latest 0.3s done
+#80 DONE 4.0s
+
+#81 [team10-api] exporting to image
+#81 exporting layers done
+#81 exporting manifest sha256:47a95adb637e194f0ef2df146b04d1b9abb611ffb4ba158235739eff9059053f 0.1s done
+#81 exporting config sha256:3a1591e7f7bd24bd1246ece1b233f5c454bae24d876523bf84ff38353afc5f94 0.2s done
+#81 exporting attestation manifest sha256:66300b2d37bf24497142beb8e0fa2b4913b6fa9bd652f267973f328926e26cbb 1.7s done
+#81 exporting manifest list sha256:55b8a8bc2ff221315d5c8fdd01a04d18d96daf397de5dbe0fb05546969869d42 0.7s done
+#81 naming to docker.io/library/organizer-stack-team10-api:latest 0.4s done
+#81 unpacking to docker.io/library/organizer-stack-team10-api:latest 0.3s done
+#81 DONE 3.9s
+
+#82 [team6-db] exporting to image
+#82 exporting layers done
+#82 exporting manifest sha256:b4b72fdc43a6bfc96d4819b31f489532afdfb474346fe11fe2887bb55fc03ae3 0.1s done
+#82 exporting config sha256:2f75f0767d604c3a8381f2146400f499feac8ef55f37713efcf873b74e3585a3 0.2s done
+#82 exporting attestation manifest sha256:8c1c2d16860108292de3cda0ce47bf552174c852fe30ff3864a675ad0b9511e5 1.7s done
+#82 exporting manifest list sha256:4063ce7e4d090125113c2e7624605a312106d575af371983554ba6ff65cd5bf4 0.7s done
+#82 naming to docker.io/library/organizer-stack-team6-db:latest 0.4s done
+#82 unpacking to docker.io/library/organizer-stack-team6-db:latest 0.3s done
+#82 DONE 3.9s
+
+#83 [team2-api] exporting to image
+#83 exporting layers done
+#83 exporting manifest sha256:4271cb104aeaf271bc5c80d7c88d8e466e81c56c613cb7315b1f7cfedb73e897 0.1s done
+#83 exporting config sha256:1f68f586f6c39589e996d61f4b7224ea17164be929db027878671d089aa26d2c 0.2s done
+#83 exporting attestation manifest sha256:dd1cb914baa110edacebffc7d75c2628a8b9736705085f0025c43f55997a9a59 1.7s done
+#83 exporting manifest list sha256:bba293bfa83eb1e1e27cd976c9de1be4b18fadc0676060acb83a8fa59517d0fe 0.7s done
+#83 naming to docker.io/library/organizer-stack-team2-api:latest 0.4s done
+#83 unpacking to docker.io/library/organizer-stack-team2-api:latest 0.3s done
+#83 DONE 4.0s
+
+#84 [tournament-display] exporting to image
+#84 exporting layers done
+#84 exporting manifest sha256:64eb9f72855cf6ac5d63e2b01c438acb1a07ecbd2f22113d85d814adefd572f4 0.1s done
+#84 exporting config sha256:a437a8734ada669b4aed86ba3b26a12d9503338a8e24157e44a370500a036c6d 0.2s done
+#84 exporting attestation manifest sha256:edcea9f9b58e09f1faa126dea8a4c772d2156d22be7942643cbe707587bfd3d3 1.7s done
+#84 exporting manifest list sha256:785c6abf01a6bf46d875c9a4302cc4084c147bc35b0470f9574587df5b226924 0.7s done
+#84 naming to docker.io/library/organizer-stack-tournament-display:latest 0.4s done
+#84 unpacking to docker.io/library/organizer-stack-tournament-display:latest 0.3s done
+#84 DONE 4.0s
+
+#85 [team1-api] exporting to image
+#85 exporting layers done
+#85 exporting manifest sha256:06fbe7e2b3540d2e4e2ae71a6a32e2044b40a9e0cbb4fea2e66953080ef2954f 0.1s done
+#85 exporting config sha256:a878e8fb7eac9ad60f9e53a5f1d2df01e18f5f56882f2e68b94b3f1ba0a6b069 0.2s done
+#85 exporting attestation manifest sha256:3ac633a77c39003edd3e9143549234a649501308d8ed657b71119c48d7adb218 1.7s done
+#85 exporting manifest list sha256:0bada9a0a0126fbbd1450009f3e3c96a9a67f5d64e2d83e66d96d6c48030b0be 0.7s done
+#85 naming to docker.io/library/organizer-stack-team1-api:latest 0.4s done
+#85 unpacking to docker.io/library/organizer-stack-team1-api:latest 0.3s done
+#85 DONE 4.0s
+
+#86 [team3-db] exporting to image
+#86 exporting layers done
+#86 exporting manifest sha256:4c2eab006e6b9446dc4377c23a70cdca784cb69da1218b1c134fb0e20c4a5064 0.1s done
+#86 exporting config sha256:b504d88ed6ed0e2619de66589e3acdf88c3c8d478ef0fc49036bc616ac257f11 0.1s done
+#86 exporting attestation manifest sha256:bef94c36bc92578d8d898ea76b32f284527b465b64ddcb246467e40d1dad104a 1.7s done
+#86 exporting manifest list sha256:8e0fdf7af5fa89df5c808276af37345e74711208d50f5d6550315d6a40d4e06f 0.7s done
+#86 naming to docker.io/library/organizer-stack-team3-db:latest 0.4s done
+#86 unpacking to docker.io/library/organizer-stack-team3-db:latest 0.3s done
+#86 DONE 4.0s
+
+#87 [team5-db] exporting to image
+#87 exporting layers done
+#87 exporting manifest sha256:c9501354d82d529c326bec096e534ba63ab854e6ef66728a38ce1e3cc8b72748 0.1s done
+#87 exporting config sha256:0be475429e36fb28a39b64f10bb8e37bcb658f232a54183f3cee4fe979d6f5d4 0.1s done
+#87 exporting attestation manifest sha256:484931ed0dbee4210a0a4e4869e3bb6b1ae4acbe46655f5b66b5281220df5462 1.7s done
+#87 exporting manifest list sha256:20021e72c2999707194e296e981a967a22b62f821bc8ee91fb649d759bf662fd 0.7s done
+#87 naming to docker.io/library/organizer-stack-team5-db:latest 0.4s done
+#87 unpacking to docker.io/library/organizer-stack-team5-db:latest 0.3s done
+#87 DONE 4.0s
+
+#88 [team4-db] exporting to image
+#88 exporting layers done
+#88 exporting manifest sha256:55f0c4644eee4e04d513847e055b7993a3fe38a2ff8dd6345f20225ff74f056d 0.1s done
+#88 exporting config sha256:9e77b5ff76f37d3717c4692d570793dfc3fb5d301eb831ef2a87b35971d092e3 0.2s done
+#88 exporting attestation manifest sha256:78aa14f5ea44e2c753bfa0c6a365fec6cd6cfe8e46258063dea22f2272b5fa72 1.7s done
+#88 exporting manifest list sha256:8c025d75a25499a56d7ae62668070336c7b30b612ce7baa484472826cbdb6209 0.7s done
+#88 naming to docker.io/library/organizer-stack-team4-db:latest 0.4s done
+#88 unpacking to docker.io/library/organizer-stack-team4-db:latest 0.3s done
+#88 DONE 4.0s
+
+#89 [team5-file] exporting to image
+#89 exporting layers done
+#89 exporting manifest sha256:2c97ce2a75bc34ffcf287581ef9f6909dfb6f4e74d4cd7d8739600bfc595c49d 0.1s done
+#89 exporting config sha256:51e9c24bf6ad83d82b1524af0c709cd331f3126cf27f662c970a16de368035b8 0.1s done
+#89 exporting attestation manifest sha256:551fd702c063669037426fc419eea156527e427b7b58e1c9cf7b774bdaf33ab8 1.7s done
+#89 exporting manifest list sha256:60effe0a0da308f76e765d78b3e5965defd10b93663189c52d041cb8f2286ba4 0.7s done
+#89 naming to docker.io/library/organizer-stack-team5-file:latest 0.4s done
+#89 unpacking to docker.io/library/organizer-stack-team5-file:latest 0.3s done
+#89 DONE 4.1s
+
+#90 [team7-api] exporting to image
+#90 exporting layers done
+#90 exporting manifest sha256:66533ba0291f52e77edc8f032c0a3a14c9a1f1d79a5c07a80c4210464ad149c0 0.1s done
+#90 exporting config sha256:0b219f21904b8bb9eda08fced81dd32c0e6be309cd1687c1211f206564a71146 0.1s done
+#90 exporting attestation manifest sha256:e5d3f9d2525e788ac502a6ffce138026242c76a7911af862c7f102edd3a31e00 1.7s done
+#90 exporting manifest list sha256:6ea91313a83aebcb7ecd0f99be07b4669072d0dc91c5e5c4cae82dcd57b2da6d 0.7s done
+#90 naming to docker.io/library/organizer-stack-team7-api:latest 0.4s done
+#90 unpacking to docker.io/library/organizer-stack-team7-api:latest 0.3s done
+#90 DONE 4.0s
+
+#91 [team6-api] exporting to image
+#91 exporting layers done
+#91 exporting manifest sha256:6a7137295aa522f57c247e3b4217eedf921c07502b80033108275bbf654b4cc3 0.1s done
+#91 exporting config sha256:e6959007439f5140fb5b2630d6fe166431467cefa3ef2338fa516ebdf65a720d 0.1s done
+#91 exporting attestation manifest sha256:0b87f35c065880b42fba9140cf02a136c669b1aa04b6874fbf63c8a2ea8de70d 1.7s done
+#91 exporting manifest list sha256:0144bdb24acfb669cd400ff7442983b676d5511098c53cf73e830ddb35d981ae 0.7s done
+#91 naming to docker.io/library/organizer-stack-team6-api:latest 0.4s done
+#91 unpacking to docker.io/library/organizer-stack-team6-api:latest 0.3s done
+#91 DONE 4.0s
+
+#92 [team9-file] exporting to image
+#92 exporting layers done
+#92 exporting manifest sha256:98334be8b5061d0a434f88beae632fc5eaea7b81b7c0e29849295e63a88a2fea 0.1s done
+#92 exporting config sha256:425d8376b8c118e756b75b7484bb11513064d299221b011c492d79546a34564a 0.1s done
+#92 exporting attestation manifest sha256:7df2abc57e78a24a8565026b7a0ee346837b4d0ed008814a8bb0825163172d8e 1.7s done
+#92 exporting manifest list sha256:33a873c9faebdbfcb998e3e4e75d30464d728b201f84816c8b67fe790771e7fd 0.7s done
+#92 naming to docker.io/library/organizer-stack-team9-file:latest 0.4s done
+#92 unpacking to docker.io/library/organizer-stack-team9-file:latest 0.3s done
+#92 DONE 4.1s
+
+#93 [team1-file] exporting to image
+#93 exporting layers done
+#93 exporting manifest sha256:2056b5f749966d2582b36c86b4880ffe535fc39cadfecc620999c429b3f543c1 done
+#93 exporting config sha256:e4ed0231a6724bfc08a813d69c631ad30af7779c4e46d77eea2af42c055981fd 0.2s done
+#93 exporting attestation manifest sha256:143baf5595d2b3d206edab2f7c3b164943bb9ddb59ee92410152b0b17a064e11 1.9s done
+#93 exporting manifest list sha256:b8f8b85d1b0f94ce5304835c0ae5d156371db28957422ddd9ecf87189e2a74c9 0.7s done
+#93 naming to docker.io/library/organizer-stack-team1-file:latest 0.4s done
+#93 unpacking to docker.io/library/organizer-stack-team1-file:latest 0.3s done
+#93 DONE 4.2s
+
+#94 [team9-api] exporting to image
+#94 exporting layers done
+#94 exporting manifest sha256:98c251eb3dd529ad858b5ebf3daea1cd6521114f013336cf67c81761fb825aa4 0.2s done
+#94 exporting config sha256:6ec6323b90fa3e2bcfe57c9bab7debe529964eaee490dd1799f8b25474158b34 0.1s done
+#94 exporting attestation manifest sha256:a4eb1138aa7090b6867c4c2dbc649e91d95e621778d6e0fa55802e6499babc07 1.7s done
+#94 exporting manifest list sha256:e0dcf79652cd1f1e911374d21f10091e36bdb36ef4b51e15598b76e7542b6779 0.8s done
+#94 naming to docker.io/library/organizer-stack-team9-api:latest 0.3s done
+#94 unpacking to docker.io/library/organizer-stack-team9-api:latest
+#94 ...
+
+#57 [team10-web] exporting to image
+#57 unpacking to docker.io/library/organizer-stack-team10-web:latest 0.4s done
+#57 DONE 4.3s
+
+#95 [team7-web] exporting to image
+#95 exporting layers done
+#95 exporting manifest sha256:d44365c02aea8e34f470cfda8fda986a1166b13f3c71ecb9f440fcf364838521 0.1s done
+#95 exporting config sha256:8f90677e9cc6e60df4c15748e3be2ab862e7e4f336b2df9c5c146509624d773c 0.1s done
+#95 exporting attestation manifest sha256:766cb5340e210e3ff46445cdde908191fbf0e923ad96c3acf4b78f79599999a5 1.8s done
+#95 exporting manifest list sha256:1f5b252dbd240fff066287c13e77ac45845bd8c43ea2931340df0e45273594f6 0.8s done
+#95 naming to docker.io/library/organizer-stack-team7-web:latest 0.3s done
+#95 unpacking to docker.io/library/organizer-stack-team7-web:latest 0.4s done
+#95 DONE 4.4s
+
+#96 [team5-web] exporting to image
+#96 exporting layers done
+#96 exporting manifest sha256:ee8f03c26a1adf3cdfffc77dd5b1475bdd93bcadacdda78e982a7f693045ed0d 0.1s done
+#96 exporting config sha256:457a8da3fec4f5e0650ec7f63a99b613014971e824d49c35cb3453fccaf64a8c 0.1s done
+#96 exporting attestation manifest sha256:cdc32fa74f24f7fd23bb761762328d0f800685b2fe32fad4a955393e07e38d0e 1.8s done
+#96 exporting manifest list sha256:3d1c8c2125eb39aba2ce3611086286406ceb9df0214fabc5fc3754931beed6ef 0.8s done
+#96 naming to docker.io/library/organizer-stack-team5-web:latest 0.3s done
+#96 unpacking to docker.io/library/organizer-stack-team5-web:latest 0.4s done
+#96 DONE 4.4s
+
+#97 [team3-api] exporting to image
+#97 exporting layers done
+#97 exporting manifest sha256:3b7d627bb80b5d9c71c497d2941ce86c182f3f6233eb800978031149d75e1e47 0.1s done
+#97 exporting config sha256:129bcf91425d93c9bbe64c66ea1dd50a6d888cbb79ac1b5537b9ca8053a2bc50 0.1s done
+#97 exporting attestation manifest sha256:f1f150952b00fb4e3b3c7e15eb90e96fd2e2971ca03cada9d631abb472ec7672 1.8s done
+#97 exporting manifest list sha256:d8ee2ce9eecbea4039e4d44719d12aab328a66582f312dcee748b6e89e333cf0 0.8s done
+#97 naming to docker.io/library/organizer-stack-team3-api:latest 0.3s done
+#97 unpacking to docker.io/library/organizer-stack-team3-api:latest 0.4s done
+#97 DONE 4.3s
+
+#98 [team7-db] exporting to image
+#98 exporting layers done
+#98 exporting manifest sha256:a3dae60c47687c13724e69f0ea0b5ce7c0ea87d926f47759bfe0e1fb26b8a612 0.1s done
+#98 exporting config sha256:93608d228e24bb983b94a180fa2d60e89f605baffa946bf0bca135d31f5cd26a 0.1s done
+#98 exporting attestation manifest sha256:759931ea034d2fd5430503236c9972b990d42d276178c196e5c99b8ac06d1b20 1.8s done
+#98 exporting manifest list sha256:9535c4f7cd381c8d00b842415d406a8f07b0526d1370b13c79e849bf0ad1db0b 0.8s done
+#98 naming to docker.io/library/organizer-stack-team7-db:latest 0.3s done
+#98 unpacking to docker.io/library/organizer-stack-team7-db:latest 0.4s done
+#98 DONE 4.4s
+
+#99 [team4-web] exporting to image
+#99 exporting layers done
+#99 exporting manifest sha256:8053f49e1805431a1413327841c801002aae3c9b91a3fd9d84bd7ba763647489 0.0s done
+#99 exporting config sha256:74c4bbfb6d4e4018fa1ef19ac119caacbe6353d0d22b8757a4e75a4c05e0b1fe 0.2s done
+#99 exporting attestation manifest sha256:bce49b96c49814722c8741560db2802e1f4bfb876d1ada92f3fb41ad15268bf1 1.9s done
+#99 exporting manifest list sha256:858823137d2ab4fdaf39d9755e1f5e2c7d1e58376793ff5d6822c4cafabca77b 0.8s done
+#99 naming to docker.io/library/organizer-stack-team4-web:latest 0.3s done
+#99 unpacking to docker.io/library/organizer-stack-team4-web:latest 0.4s done
+#99 DONE 4.5s
+
+#100 [team2-db] exporting to image
+#100 exporting layers done
+#100 exporting manifest sha256:7cfadf0bc191285d04c10447ac3800f7ac05ee88de5251d26c778fa0ed37c83a 0.1s done
+#100 exporting config sha256:ab4659ad9d79ecc3d435982f43655cc27fcde69ce319f024831d5ba632d5c623 0.1s done
+#100 exporting attestation manifest sha256:20e60c008c653370a22c5ba374360a1d33d06710c1c2edc103bc3824822f3d17 1.8s done
+#100 exporting manifest list sha256:912955b239b29a4ad572f4dfc0b89e8eee1484bac1fe738f4e5e4c59a842ba16 0.8s done
+#100 naming to docker.io/library/organizer-stack-team2-db:latest 0.3s done
+#100 unpacking to docker.io/library/organizer-stack-team2-db:latest 0.4s done
+#100 DONE 4.4s
+
+#101 [team9-db] exporting to image
+#101 exporting layers done
+#101 exporting manifest sha256:8eead0de55e628808619e588310b7f5b23bccad049d53ec4c280788fdaced328 0.1s done
+#101 exporting config sha256:a3684143a820c64fe83d139faee952a8a7d8a6ec8883ea68b8c3bf217e18acd4 0.1s done
+#101 exporting attestation manifest sha256:03e6fc4dc06eeb9b38ec694658432cc3b1f2b2ccd1c3c373945ea7404b9c3a49 1.8s done
+#101 exporting manifest list sha256:e7d1b66fac57e313295f1a3a9f3a7ed94c2b5e1893e8c3a6844798e5beb31cfb 0.8s done
+#101 naming to docker.io/library/organizer-stack-team9-db:latest 0.3s done
+#101 unpacking to docker.io/library/organizer-stack-team9-db:latest 0.5s done
+#101 DONE 4.4s
+
+#102 [team3-file] exporting to image
+#102 exporting layers done
+#102 exporting manifest sha256:abee14bdf67a2ab7176ac554ed2d411e977a364f5d86736b3020a7a3541bb1c9 0.1s done
+#102 exporting config sha256:c609877d700dffe6ebdea7d2ad482a7a2a958538c1a97d13c92063be357aa594 0.1s done
+#102 exporting attestation manifest sha256:52206ad405d785fb4b98f8425b89f948100bbdb20c422fd5a02e00ed83f52025 1.8s done
+#102 exporting manifest list sha256:5468db7a289f628b0d7a808b133370fb996ede1eb85b000946432855293d48d2 0.8s done
+#102 naming to docker.io/library/organizer-stack-team3-file:latest 0.3s done
+#102 unpacking to docker.io/library/organizer-stack-team3-file:latest 0.5s done
+#102 DONE 4.4s
+
+#103 [team8-api] exporting to image
+#103 exporting layers done
+#103 exporting manifest sha256:e075bd27453b9defbfb8ada8584bb9e12098b79cf9fb27d5357423a439ab8e07 0.1s done
+#103 exporting config sha256:15e0c720c3940b9c02d91e6595a7238ba05f7fcf786860b015c48f54e7723363 0.1s done
+#103 exporting attestation manifest sha256:ea8ca0924a3cc3a56dc713aafd06f472bb279bcc90afcf940672cd677198b372 1.8s done
+#103 exporting manifest list sha256:f9f1370615ca22d11844062db18139dbe2d6372ae114cc33678b9a047cc355a8 0.8s done
+#103 naming to docker.io/library/organizer-stack-team8-api:latest 0.3s done
+#103 unpacking to docker.io/library/organizer-stack-team8-api:latest 0.5s done
+#103 DONE 4.4s
+
+#104 [team1-db] exporting to image
+#104 exporting layers done
+#104 exporting manifest sha256:935a133fc5ceb0196141a5664c1138467ec34c3f53eff1735a95871fcb5072b4 0.1s done
+#104 exporting config sha256:f0d7b12e9451123253292d61a9d67bb59120668fd45f0ff6fea96c0176ca23a0 0.1s done
+#104 exporting attestation manifest sha256:c97cd919bbe14a33cfc9f6a9a7629b0e5dd4db1bf380ae0bdbc9dfd7ceb65a7b 1.8s done
+#104 exporting manifest list sha256:faf5d4a3451271d0cf5fd1cc1736fbaa1f648c3b96827f0345f252597593a6c0 0.8s done
+#104 naming to docker.io/library/organizer-stack-team1-db:latest 0.3s done
+#104 unpacking to docker.io/library/organizer-stack-team1-db:latest 0.5s done
+#104 DONE 4.4s
+
+#105 [team6-file] exporting to image
+#105 exporting layers done
+#105 exporting manifest sha256:a96856f69dbfa12c108fed20e320c7dfc51860a173e6de7391088e2e4e6e1f39 0.1s done
+#105 exporting config sha256:25e55299a7fa35f7503661ee0e3ebf94dcc16248fba176f898c1e2102d213010 0.1s done
+#105 exporting attestation manifest sha256:33833dd1b11fa8401d3aa3f549916c2fae16096ad50805b6a8b86a02e54700a4 1.8s done
+#105 exporting manifest list sha256:96931495a876aa311ad53f2f4abc45e42f21adc99734f1776db092ef4fa5e316 0.8s done
+#105 naming to docker.io/library/organizer-stack-team6-file:latest 0.3s done
+#105 unpacking to docker.io/library/organizer-stack-team6-file:latest 0.5s done
+#105 DONE 4.5s
+
+#106 [team3-web] exporting to image
+#106 exporting layers done
+#106 exporting manifest sha256:5ae339f6fa29cb5d48009ce4491c29de80a3bc1991a6da64fd8ea60d9bbc83e5 0.1s done
+#106 exporting config sha256:84e34b5a5032776e95a50644f28a53ac5d12e90c8fb51fa38f4d913999f78e6d 0.1s done
+#106 exporting attestation manifest sha256:5b296a87e25d8f1449f3e34c0a1199d0af799308931609221b4f6605f44c4af6 1.8s done
+#106 exporting manifest list sha256:9bd05e1a56dbaaec914b8fda7e5465a3c8eb1748caa538aa246e63233164bfad 0.8s done
+#106 naming to docker.io/library/organizer-stack-team3-web:latest 0.3s done
+#106 unpacking to docker.io/library/organizer-stack-team3-web:latest 0.5s done
+#106 DONE 4.5s
+
+#107 [team4-file] exporting to image
+#107 exporting layers done
+#107 exporting manifest sha256:e8456ab2751d157c058c8a69a4bbe64a51ca5a8649cf2f1ca6d7daabed15bfcb 0.1s done
+#107 exporting config sha256:c9bf257202afc22ff5186d0645cbe47f96a36cc5560360226f947f4b5f21647c 0.1s done
+#107 exporting attestation manifest sha256:b63fdf3199fa3aa5b034cf65b724443650cbc38ef0fcc7d1152e666ba3560a4e 1.8s done
+#107 exporting manifest list sha256:877bc37df297905b3dbec2fbfefe16b0b470fcadd41254de3765593d7e262f62 0.8s done
+#107 naming to docker.io/library/organizer-stack-team4-file:latest 0.3s done
+#107 unpacking to docker.io/library/organizer-stack-team4-file:latest 0.5s done
+#107 DONE 4.5s
+
+#108 [team8-db] exporting to image
+#108 exporting layers done
+#108 exporting manifest sha256:0782fbf60dc75c2ac27ecdab63f6ac19c133618dc1f8f4270c3628b867c7d2e1 0.1s done
+#108 exporting config sha256:b00bf11bdaa0f6aa79c339835ab2f9f707bf10004568b8567ebdc40610af3ccc 0.1s done
+#108 exporting attestation manifest sha256:83e64a832799fe7a2d238c410e6c70fa848b1f6e2ae16c6c0355a1a6d57f9f27 1.8s done
+#108 exporting manifest list sha256:9c53b119f536cfd8c52ab23948c1de28a762d09b75e8548df3c8ce68ab8c8e97 0.8s done
+#108 naming to docker.io/library/organizer-stack-team8-db:latest 0.3s done
+#108 unpacking to docker.io/library/organizer-stack-team8-db:latest 0.5s done
+#108 DONE 4.5s
+
+#94 [team9-api] exporting to image
+#94 unpacking to docker.io/library/organizer-stack-team9-api:latest 0.6s done
+#94 DONE 4.7s
+
+#109 [team8-web] exporting to image
+#109 exporting layers done
+#109 exporting manifest sha256:1c20b273076298e06207687c3c05e0c66dc46e9b9717f8132331b62ca1dc1a27 0.1s done
+#109 exporting config sha256:b63616905db6a59141e24c165351fa601f63e80572923c8e0d8e608c58aa8948 0.1s done
+#109 exporting attestation manifest sha256:ccddc86fa1a321f95984453ca6d1b8a3a552b0a8ba3033ca990c8a241cca1a44 1.7s done
+#109 exporting manifest list sha256:6a0e6367513d1ac3a5b6ddce780bc245018f06f6de7ec738f684da737b96dabe 0.8s done
+#109 naming to docker.io/library/organizer-stack-team8-web:latest 0.3s done
+#109 unpacking to docker.io/library/organizer-stack-team8-web:latest 0.5s done
+#109 DONE 4.7s
+
+#110 [team1-web] exporting to image
+#110 exporting layers done
+#110 exporting manifest sha256:e75ecda712d4da5a572a9488eb8fca1bd66dd4f937adc37b79f261947a7f8552 0.2s done
+#110 exporting config sha256:5037b5a71e01ea0f005b275ec16adc4ad2c51586b00cb47ad7682768719bc2e9 0.1s done
+#110 exporting attestation manifest sha256:f74ff79cbfaebfb21379e5371a94e2c72c266f9d3a2971fa94b3e8dc8398c0a4 1.7s done
+#110 exporting manifest list sha256:ed0b1571d254e820b36297b597aa3c4048f0fded22b9b14d338ba539caa39737 0.8s done
+#110 naming to docker.io/library/organizer-stack-team1-web:latest 0.3s done
+#110 unpacking to docker.io/library/organizer-stack-team1-web:latest 0.6s done
+#110 DONE 4.7s
+
+#111 [team2-file] exporting to image
+#111 exporting layers done
+#111 exporting manifest sha256:c189de289c231611ad3171d9640ff931eec0f9e696accdda2d3a8b4f91bde970 0.2s done
+#111 exporting config sha256:a96124e72c12f07ed6a4c6b70f501b4916d55bc28a96a8d392d00645a8fd9eb1 0.1s done
+#111 exporting attestation manifest sha256:91c1ebb3b8b979db4cb6c85a08a893045883150e0102d3d0aa8f59543b7879a7 1.7s done
+#111 exporting manifest list sha256:84a30ab63ae64a833712e52f1d21bfb4a85b4f46b4856f2f4e0adf792a07d688 0.8s done
+#111 naming to docker.io/library/organizer-stack-team2-file:latest 0.3s done
+#111 unpacking to docker.io/library/organizer-stack-team2-file:latest 0.6s done
+#111 DONE 4.7s
+
+#112 [team2-proxy] exporting to image
+#112 exporting layers done
+#112 exporting manifest sha256:e18eee975551fb79589a627d4f08ed63e96b5d41128c7a82ef0a88f3e420822f 0.2s done
+#112 exporting config sha256:b9e16f4813c5e181feefd9191f8eb339ec5bdbb3c7a742239d5ff5a814ae066a 0.4s done
+#112 exporting attestation manifest sha256:5fa9405c05760d1cfa5309778f698041f4f0728b4d55d8f010dbe4fdd7a00afd 1.7s done
+#112 exporting manifest list sha256:d1c5fa83350d06ddf5a53e211d0d1babad06d51de279ba36ef9b82fe4e9dec01 0.7s done
+#112 naming to docker.io/library/organizer-stack-team2-proxy:latest 0.4s done
+#112 unpacking to docker.io/library/organizer-stack-team2-proxy:latest 0.0s done
+#112 DONE 4.6s
+
+#113 [team6-proxy] exporting to image
+#113 exporting layers done
+#113 exporting manifest sha256:b4e91a3485424e2098648d17ea73ab91aeab35222a03be40a3bb6989ed9a43ab 0.2s done
+#113 exporting config sha256:8926daf36792049244519309e88bee407647344e9f34e2b7ccb6356e3db0a6ea 0.4s done
+#113 exporting attestation manifest sha256:4fd2fd902496cd7ba79c9a6a26e2a79b9a0f319fd389aba08bd1506147458f25 1.7s done
+#113 exporting manifest list sha256:42e5acdc8efdaf64a6ebd697fd46380fc6a0e3380b9548e6266eeac1ef31da70 0.7s done
+#113 naming to docker.io/library/organizer-stack-team6-proxy:latest 0.4s done
+#113 unpacking to docker.io/library/organizer-stack-team6-proxy:latest
+#113 ...
+
+#114 [team4-proxy] exporting to image
+#114 exporting layers done
+#114 exporting manifest sha256:ba27a9d9d88b7b9a9181e4973ae80aae755522f74e0376b1ba3d62b58df0cf1f 0.2s done
+#114 exporting config sha256:abb184ab59db56c655de2c351902c074db21e3e5ab74d10e830bd24ecd90d746 0.4s done
+#114 exporting attestation manifest sha256:ae52337d72305d35ae2baae8af4f9a5445dce5dbd5f041afbbe0718f9d346497 1.6s done
+#114 exporting manifest list sha256:526a530afd069af1aea54d4dc4ed041d2f563e90fa422d9be6732867e9b71ff9 0.7s done
+#114 naming to docker.io/library/organizer-stack-team4-proxy:latest 0.5s done
+#114 unpacking to docker.io/library/organizer-stack-team4-proxy:latest 0.6s done
+#114 DONE 5.0s
+
+#115 [team3-proxy] exporting to image
+#115 exporting layers done
+#115 exporting manifest sha256:7a4e1c1a10868743d15d7449a636d3cbff372bc38c54dde627368f32fd1d4734 0.2s done
+#115 exporting config sha256:ca57b32dd61188835b45cbe9902c2fe20078d4e625f5271abca2233757ce030a 0.4s done
+#115 exporting attestation manifest sha256:ecd33c2dfe7ce93b70bb0142c77f384b0c5bfaf24e6da3b8abc322656c0f49f2 1.7s done
+#115 exporting manifest list sha256:2acabcfba4200e17a4075a1621277e74a2884cb24ef48eb721e4374baf3e702e 0.7s done
+#115 naming to docker.io/library/organizer-stack-team3-proxy:latest 0.4s done
+#115 unpacking to docker.io/library/organizer-stack-team3-proxy:latest
+#115 ...
+
+#116 [team7-proxy] exporting to image
+#116 exporting layers 0.0s done
+#116 exporting manifest sha256:d0051e0ad21fe1088df93f775e2cd2ee8eb9738f0d6539ce8818ed7af63bf857 0.1s done
+#116 exporting config sha256:7d8e799c492328463f96974cce3fbd6bfce7f3ddd828b3639047e7fe0cd4ea48 0.4s done
+#116 exporting attestation manifest sha256:9a7e77b5e72b6331d1fab856dda53529fa4789ced44f8d1f220538825ef7608b 1.6s done
+#116 exporting manifest list sha256:c8e5f87b4e40812655315eed6a95a96cff3617004540ca86e85e8d545520d7f2 0.7s done
+#116 naming to docker.io/library/organizer-stack-team7-proxy:latest 0.6s done
+#116 unpacking to docker.io/library/organizer-stack-team7-proxy:latest 0.8s done
+#116 DONE 5.4s
+
+#115 [team3-proxy] exporting to image
+#115 unpacking to docker.io/library/organizer-stack-team3-proxy:latest 0.8s done
+#115 ...
+
+#117 [team1-proxy] exporting to image
+#117 exporting layers done
+#117 exporting manifest sha256:297182cdc6f2d23da39d1a7e1b75bf4a4668a11336b8fd7b35ab24529ecc9af5 0.2s done
+#117 exporting config sha256:22806f238b3315947b4cde335ef0fd788da93d0b5c5b585061df6931c1d381dc 0.4s done
+#117 exporting attestation manifest sha256:4851776e05978786e415c209f6d6de051b02041368f62e94ea78df45873e68c5 1.7s done
+#117 exporting manifest list sha256:b4813a3698a616203a3667ad4bf3ec6fb67a9594da40281e54ad1f60f725195e 0.7s done
+#117 naming to docker.io/library/organizer-stack-team1-proxy:latest 0.4s done
+#117 unpacking to docker.io/library/organizer-stack-team1-proxy:latest 0.8s done
+#117 DONE 5.4s
+
+#118 [team5-proxy] exporting to image
+#118 exporting layers done
+#118 exporting manifest sha256:d50bd440930fcfcf1988d14d1ab0399c01558faa4a080ef8e016c7f9a6af7e51 0.1s done
+#118 exporting config sha256:a849fac693f5f6f74a3bf370cba5849ac59db41569bd84d1fc4cff88d7c9ecc7 0.4s done
+#118 exporting attestation manifest sha256:4e584ab8b54d245ea2069989629343866c983540ec440ebd93694af717d87de1 1.7s done
+#118 exporting manifest list sha256:3b9223d8614d0f0ea24adb1e38f639a6600d2aaf5e009f16b78ebee91395c98d 0.7s done
+#118 naming to docker.io/library/organizer-stack-team5-proxy:latest 0.5s done
+#118 unpacking to docker.io/library/organizer-stack-team5-proxy:latest 0.8s done
+#118 DONE 5.4s
+
+#119 [team10-proxy] exporting to image
+#119 exporting layers done
+#119 exporting manifest sha256:b2516836b3bbf6f3b21d4921c759f268ef53be87d0bd67240d2f7b34f8302836 0.2s done
+#119 exporting config sha256:cd910235729cd4040a37e8e2b45ddec81e2ec53e2aef10264c215a596deb22bf 0.4s done
+#119 exporting attestation manifest sha256:579771371433e9380eaf37b3b69bc56e20187132261144caa60993510393dfac 1.7s done
+#119 exporting manifest list sha256:671883c1f48aa964d93b380da0dd31dfe35795cf4e8dbc9c28dee8854e8abcea 0.7s done
+#119 naming to docker.io/library/organizer-stack-team10-proxy:latest 0.5s done
+#119 unpacking to docker.io/library/organizer-stack-team10-proxy:latest 0.8s done
+#119 DONE 5.4s
+
+#120 [team9-proxy] exporting to image
+#120 exporting layers done
+#120 exporting manifest sha256:014d8b978ba9e9f202fa695259b6825ac00e4e5df350aab342ae2e52d609a998 0.2s done
+#120 exporting config sha256:ab04ac323a6d723b01e5cf46a812d17381e8f3118b550fc34824a2a66b723c18 0.4s done
+#120 exporting attestation manifest sha256:bdff3e558982e855398461e86ab0694e65c05c4b9289dbc92bc8528fb9b9aafb 1.7s done
+#120 exporting manifest list sha256:a781f0fae4aedde756d948136b15ca7753250a95d3d1598c3e79d525902dce48 0.7s done
+#120 naming to docker.io/library/organizer-stack-team9-proxy:latest 0.4s done
+#120 unpacking to docker.io/library/organizer-stack-team9-proxy:latest 0.8s done
+#120 DONE 5.4s
+
+#121 [team8-proxy] exporting to image
+#121 exporting layers done
+#121 exporting manifest sha256:7dd2fea55feabfec7dc3ccc265d3a675a31366af07a35425e8160399d76e8f3d 0.2s done
+#121 exporting config sha256:f7d9e830b336761b5e05f692244f5566a521a669cc2a2dc5142c64a15bc6e5e8 0.4s done
+#121 exporting attestation manifest sha256:5309677d5201fa2129d7e1436a076c491f31a5a50b9e194e378ac06e9aac1f38 1.7s done
+#121 exporting manifest list sha256:93f7f0d9d526e00aae2ca906eb8fd4148e8175c337917f1fe28602ab31679404 0.8s done
+#121 naming to docker.io/library/organizer-stack-team8-proxy:latest 0.4s done
+#121 unpacking to docker.io/library/organizer-stack-team8-proxy:latest 0.8s done
+#121 DONE 5.4s
+
+#115 [team3-proxy] exporting to image
+#115 DONE 5.4s
+
+#113 [team6-proxy] exporting to image
+#113 unpacking to docker.io/library/organizer-stack-team6-proxy:latest 0.8s done
+#113 DONE 5.4s
+
+#122 [team4-ide] exporting to image
+#122 exporting layers done
+#122 exporting manifest sha256:e4fbac933976431c9200938c9c0e51cb0b17cc1c2c5246fc6e7f4c61a80e3066 0.4s done
+#122 exporting config sha256:af4c7fa145aa444a0329113bbaf5c068cf98205d3e7539f20f3ead4ce09a3f3c 0.5s done
+#122 exporting attestation manifest sha256:1f42fca7f0defb3325e65fe628710eec55b8fbaac0d8043e6c7e593259aad6ee 1.5s done
+#122 exporting manifest list sha256:2c68784d78c1de523a9bb6afca6df6ace333dde9e286bdda71a48fd0cde2a895 1.1s done
+#122 naming to docker.io/library/organizer-stack-team4-ide:latest
+#122 naming to docker.io/library/organizer-stack-team4-ide:latest 1.0s done
+#122 unpacking to docker.io/library/organizer-stack-team4-ide:latest
+#122 ...
+
+#123 [team10-ide] exporting to image
+#123 exporting layers done
+#123 exporting manifest sha256:056859d412590342fd2c356b3a88542a1cd568896a0e39c0437a018fa1a484d0 0.4s done
+#123 exporting config sha256:21f2b09efe0641a182d249d950c95a9367da8fc73d3bf723cedf32af3ef0a93c 0.5s done
+#123 exporting attestation manifest sha256:4c97578a7f51c8ce527c1f12ec0e62be30d445ba5691b823c00392b2278b3143 1.5s done
+#123 exporting manifest list sha256:6cfeb3e1c92384f922a72370b96facd4d226fe6f467181150c8cef2e8362abc1 1.0s done
+#123 naming to docker.io/library/organizer-stack-team10-ide:latest 1.1s done
+#123 unpacking to docker.io/library/organizer-stack-team10-ide:latest 0.8s done
+#123 ...
+
+#124 [team5-ide] exporting to image
+#124 exporting layers done
+#124 exporting manifest sha256:a5265cf40789f461cb28923e40278a507cb96c5aa51046e88c06b3f856ef0c0a 0.4s done
+#124 exporting config sha256:9fb4298d4cf04e3786dac812e60826a91ab394b753a7bc1df5459771dd3a623f 0.5s done
+#124 exporting attestation manifest sha256:6c0fab9285b5e3790b939b615658716becd3eca6ba3de8943cf4e443a983bc80 1.5s done
+#124 exporting manifest list sha256:698967ac2db3438710ef2c3130c09dbfa34db4043258f46b3ad399482c87e800 1.1s done
+#124 naming to docker.io/library/organizer-stack-team5-ide:latest 1.0s done
+#124 unpacking to docker.io/library/organizer-stack-team5-ide:latest 0.8s done
+#124 DONE 6.4s
+
+#122 [team4-ide] exporting to image
+#122 unpacking to docker.io/library/organizer-stack-team4-ide:latest 0.8s done
+#122 DONE 6.5s
+
+#123 [team10-ide] exporting to image
+#123 DONE 6.4s
+
+#125 [team6-ide] exporting to image
+#125 exporting layers done
+#125 exporting manifest sha256:7773e0ddf8d50f37d3ae7effc293ab0ced5d8c09506753748091d07453b04062 0.4s done
+#125 exporting config sha256:e48b5343bc91336646028644f16ae156b154b04dbb6f62b524b92d44f47c2004 0.5s done
+#125 exporting attestation manifest sha256:57d985df46dfe73d904bdc9dc93d19321fdd27b2239ca47a6b35435a16a39b32 1.5s done
+#125 exporting manifest list sha256:81b71025b0f65805cd5fb86d05d4735753e93eda126c28312c794cc0c1dffe77 1.1s done
+#125 naming to docker.io/library/organizer-stack-team6-ide:latest 1.0s done
+#125 unpacking to docker.io/library/organizer-stack-team6-ide:latest 0.8s done
+#125 DONE 6.5s
+
+#126 [team1-ide] exporting to image
+#126 exporting layers done
+#126 exporting manifest sha256:c16836768ed6fe8058107165928e3d28f691e17def455fde9c8894fa6d91b5fb 0.4s done
+#126 exporting config sha256:b7834ecf3954dc2403452e3fb9113414555f8a8a1c0f6eb581c6473b9d8c5cf2 0.5s done
+#126 exporting attestation manifest sha256:ab2309b7c56cdd170ffd0586609c34bd470c716d602372f67c82748401c6c92a 1.5s done
+#126 exporting manifest list sha256:379433804f3a35a9dd0a4561c8e54ced7984d052b1f688262d781c3265164a48 1.1s done
+#126 naming to docker.io/library/organizer-stack-team1-ide:latest 1.0s done
+#126 unpacking to docker.io/library/organizer-stack-team1-ide:latest 0.8s done
+#126 DONE 6.5s
+
+#127 [team7-ide] exporting to image
+#127 exporting layers done
+#127 exporting manifest sha256:e5706441af1b43984bd4e2a24b03fb92dc287e863d1fc6d5cb997ec039625b30 0.4s done
+#127 exporting config sha256:d8e057af5d79e1d951a748cc412f6b2e999ba7b2aea0f79774ed88caa41f7fbb 0.5s done
+#127 exporting attestation manifest sha256:658dba2faf298a66499c21d7fb052cd2bb6fea7a55b8bf6863b4e7f8dac6c47b 1.5s done
+#127 exporting manifest list sha256:d02085fe82ab53c6d8fe77479afb1aafb16b5d19640a88b84718255aefb2ff27 1.1s done
+#127 naming to docker.io/library/organizer-stack-team7-ide:latest 1.0s done
+#127 unpacking to docker.io/library/organizer-stack-team7-ide:latest 0.8s done
+#127 DONE 6.5s
+
+#128 [team8-ide] exporting to image
+#128 exporting layers done
+#128 exporting manifest sha256:edfffa195dc717a4d2439871bb3ef87b2d3cc0834553156f22c146ede7a35864 0.4s done
+#128 exporting config sha256:35c34afdd51cf124072b480315e36878fc3bb477b29030250de66c3e2c675d6c 0.5s done
+#128 exporting attestation manifest sha256:f1c18ca4d1d276f78a221d5d842d37fa1d57d7fbc38fc9a5752ef6d3cb4a0432 1.5s done
+#128 exporting manifest list sha256:6ebcd16278c73f6120401277e867f05fb598d39389726beab12cd1cab2c38c67 1.1s done
+#128 naming to docker.io/library/organizer-stack-team8-ide:latest 1.0s done
+#128 unpacking to docker.io/library/organizer-stack-team8-ide:latest 0.8s done
+#128 DONE 6.5s
+
+#129 [team9-ide] exporting to image
+#129 exporting layers done
+#129 exporting manifest sha256:308621fe83d143a8c8123e09309f9b3f78e4167313ee3f1873fb1e8d421bfeba 0.4s done
+#129 exporting config sha256:04f37fe6cbb792279d878fb64b0049be63c3203413686f145be0047f3e43ddbb 0.5s done
+#129 exporting attestation manifest sha256:aaf5fad62fd07d2e5d864a733f1c1549afe31111c5d6e545487aaae6f32eacc3 1.5s done
+#129 exporting manifest list sha256:d61cdffcafa78ec1936a5d1357fca4e1b149d6a352e6c312fe91e6e01016bc4f 1.1s done
+#129 naming to docker.io/library/organizer-stack-team9-ide:latest 1.0s done
+#129 unpacking to docker.io/library/organizer-stack-team9-ide:latest 0.8s done
+#129 DONE 6.4s
+
+#130 [team2-ide] exporting to image
+#130 exporting layers done
+#130 exporting manifest sha256:e1448fda4074f19916dd3a2a3c8b5cefefa06a3005ceb0645b077232df79e882 0.4s done
+#130 exporting config sha256:2305edde697fd8b9e75aaed832bfd2e12e1a3678e4b829394387ac4108e194f7 0.5s done
+#130 exporting attestation manifest sha256:323c1490ac8bcda7df0a7171e87ad23408726a7e2086c44384ff6ac9c9404fd8 1.5s done
+#130 exporting manifest list sha256:393aff01d70c81e09b62390a44a80edd79b4d332f3c6af45223d991a038e7197 1.1s done
+#130 naming to docker.io/library/organizer-stack-team2-ide:latest 1.0s done
+#130 unpacking to docker.io/library/organizer-stack-team2-ide:latest 0.8s done
+#130 DONE 6.4s
+
+#131 [team3-ide] exporting to image
+#131 exporting layers done
+#131 exporting manifest sha256:5ba50368f16df930891da3b8a00ba96cf610c674057ec929d1508c986878fb50 0.4s done
+#131 exporting config sha256:1e844d860e9cc407a65b7f810aca880780e00bee020d8be7c22139130b1978f0 0.5s done
+#131 exporting attestation manifest sha256:5d4139d0629119a4bb5df2f13c49d4fc823a4bc6ebaf7ab222bfdf48192e9be0 1.5s done
+#131 exporting manifest list sha256:059bac7182729b082b774f06fe5ee7ae156aa0e7a87b2a891b4121f9d8a9546d 1.1s done
+#131 naming to docker.io/library/organizer-stack-team3-ide:latest 1.0s done
+#131 unpacking to docker.io/library/organizer-stack-team3-ide:latest 0.8s done
+#131 DONE 6.5s
+
+#132 [team10-file] resolving provenance for metadata file
+#132 DONE 0.2s
+
+#133 [team10-db] resolving provenance for metadata file
+#133 DONE 0.2s
+
+#134 [team9-file] resolving provenance for metadata file
+#134 DONE 0.2s
+
+#135 [team2-file] resolving provenance for metadata file
+#135 DONE 0.2s
+
+#136 [team2-api] resolving provenance for metadata file
+#136 DONE 0.2s
+
+#137 [team10-proxy] resolving provenance for metadata file
+#137 DONE 0.2s
+
+#138 [team3-file] resolving provenance for metadata file
+#138 DONE 0.2s
+
+#139 [team6-api] resolving provenance for metadata file
+#139 DONE 0.2s
+
+#140 [team1-web] resolving provenance for metadata file
+#140 DONE 0.2s
+
+#141 [team1-proxy] resolving provenance for metadata file
+#141 DONE 0.2s
+
+#142 [team2-db] resolving provenance for metadata file
+#142 DONE 0.2s
+
+#143 [team3-ide] resolving provenance for metadata file
+#143 DONE 0.2s
+
+#144 [team5-api] resolving provenance for metadata file
+#144 DONE 0.2s
+
+#145 [team8-db] resolving provenance for metadata file
+#145 DONE 0.2s
+
+#146 [team1-file] resolving provenance for metadata file
+#146 DONE 0.2s
+
+#147 [team10-web] resolving provenance for metadata file
+#147 DONE 0.2s
+
+#148 [team8-web] resolving provenance for metadata file
+#148 DONE 0.2s
+
+#149 [team9-api] resolving provenance for metadata file
+#149 DONE 0.2s
+
+#150 [team4-web] resolving provenance for metadata file
+#150 DONE 0.2s
+
+#151 [team5-proxy] resolving provenance for metadata file
+#151 DONE 0.2s
+
+#152 [team8-proxy] resolving provenance for metadata file
+#152 DONE 0.2s
+
+#153 [team7-db] resolving provenance for metadata file
+#153 DONE 0.2s
+
+#154 [team7-api] resolving provenance for metadata file
+#154 DONE 0.2s
+
+#155 [orchestrator] resolving provenance for metadata file
+#155 DONE 0.2s
+
+#156 [team6-db] resolving provenance for metadata file
+#156 DONE 0.2s
+
+#157 [team1-ide] resolving provenance for metadata file
+#157 DONE 0.2s
+
+#158 [team10-api] resolving provenance for metadata file
+#158 DONE 0.2s
+
+#159 [team3-proxy] resolving provenance for metadata file
+#159 DONE 0.2s
+
+#160 [tournament-display] resolving provenance for metadata file
+#160 DONE 0.2s
+
+#161 [team8-file] resolving provenance for metadata file
+#161 DONE 0.2s
+
+#162 [admin-dashboard] resolving provenance for metadata file
+#162 DONE 0.2s
+
+#163 [team4-proxy] resolving provenance for metadata file
+#163 DONE 0.2s
+
+#164 [team6-web] resolving provenance for metadata file
+#164 DONE 0.2s
+
+#165 [team3-db] resolving provenance for metadata file
+#165 DONE 0.1s
+
+#166 [team7-file] resolving provenance for metadata file
+#166 DONE 0.2s
+
+#167 [team4-api] resolving provenance for metadata file
+#167 DONE 0.2s
+
+#168 [team2-ide] resolving provenance for metadata file
+#168 DONE 0.2s
+
+#169 [team1-db] resolving provenance for metadata file
+#169 DONE 0.2s
+
+#170 [team9-proxy] resolving provenance for metadata file
+#170 DONE 0.2s
+
+#171 [team5-web] resolving provenance for metadata file
+#171 DONE 0.2s
+
+#172 [team4-file] resolving provenance for metadata file
+#172 DONE 0.2s
+
+#173 [team9-ide] resolving provenance for metadata file
+#173 DONE 0.2s
+
+#174 [team6-proxy] resolving provenance for metadata file
+#174 DONE 0.2s
+
+#175 [team1-api] resolving provenance for metadata file
+#175 DONE 0.2s
+
+#176 [team2-web] resolving provenance for metadata file
+#176 DONE 0.2s
+
+#177 [team3-api] resolving provenance for metadata file
+#177 DONE 0.2s
+
+#178 [team2-proxy] resolving provenance for metadata file
+#178 DONE 0.2s
+
+#179 [team4-ide] resolving provenance for metadata file
+#179 DONE 0.2s
+
+#180 [team8-api] resolving provenance for metadata file
+#180 DONE 0.2s
+
+#181 [team5-file] resolving provenance for metadata file
+#181 DONE 0.2s
+
+#182 [team6-file] resolving provenance for metadata file
+#182 DONE 0.2s
+
+#183 [team5-db] resolving provenance for metadata file
+#183 DONE 0.2s
+
+#184 [team6-ide] resolving provenance for metadata file
+#184 DONE 0.2s
+
+#185 [team9-db] resolving provenance for metadata file
+#185 DONE 0.2s
+
+#186 [team7-proxy] resolving provenance for metadata file
+#186 DONE 0.2s
+
+#187 [team3-web] resolving provenance for metadata file
+#187 DONE 0.2s
+
+#188 [team7-web] resolving provenance for metadata file
+#188 DONE 0.2s
+
+#189 [team5-ide] resolving provenance for metadata file
+#189 DONE 0.2s
+
+#190 [team9-web] resolving provenance for metadata file
+#190 DONE 0.2s
+
+#191 [team10-ide] resolving provenance for metadata file
+#191 DONE 0.1s
+
+#192 [team4-db] resolving provenance for metadata file
+#192 DONE 0.2s
+
+#193 [team7-ide] resolving provenance for metadata file
+#193 DONE 0.2s
+
+#194 [team8-ide] resolving provenance for metadata file
+#194 DONE 0.2s
+ organizer-stack-team6-web  Built
+ organizer-stack-team3-ide  Built
+ organizer-stack-team7-api  Built
+ organizer-stack-team10-proxy  Built
+ organizer-stack-team5-db  Built
+ organizer-stack-team8-proxy  Built
+ organizer-stack-team9-proxy  Built
+ organizer-stack-team3-web  Built
+ organizer-stack-team4-file  Built
+ organizer-stack-team8-file  Built
+ organizer-stack-team2-file  Built
+ organizer-stack-team1-proxy  Built
+ organizer-stack-team9-api  Built
+ organizer-stack-team8-web  Built
+ organizer-stack-team8-api  Built
+ organizer-stack-team9-web  Built
+ organizer-stack-team9-ide  Built
+ organizer-stack-admin-dashboard  Built
+ organizer-stack-team5-web  Built
+ organizer-stack-team5-api  Built
+ organizer-stack-team9-file  Built
+ organizer-stack-team7-proxy  Built
+ organizer-stack-team5-file  Built
+ organizer-stack-team2-web  Built
+ organizer-stack-team10-db  Built
+ organizer-stack-team3-api  Built
+ organizer-stack-team2-db  Built
+ organizer-stack-team6-db  Built
+ organizer-stack-team3-proxy  Built
+ organizer-stack-team4-web  Built
+ organizer-stack-team1-api  Built
+ organizer-stack-team1-ide  Built
+ organizer-stack-team1-web  Built
+ organizer-stack-team6-proxy  Built
+ organizer-stack-team6-api  Built
+ organizer-stack-team3-file  Built
+ organizer-stack-orchestrator  Built
+ organizer-stack-team1-db  Built
+ organizer-stack-team10-ide  Built
+ organizer-stack-team4-db  Built
+ organizer-stack-team6-file  Built
+ organizer-stack-team1-file  Built
+ organizer-stack-team3-db  Built
+ organizer-stack-team4-api  Built
+ organizer-stack-team4-proxy  Built
+ organizer-stack-team2-proxy  Built
+ organizer-stack-team5-ide  Built
+ organizer-stack-team7-db  Built
+ organizer-stack-team10-web  Built
+ organizer-stack-team8-ide  Built
+ organizer-stack-team6-ide  Built
+ organizer-stack-team7-web  Built
+ organizer-stack-team7-file  Built
+ organizer-stack-team5-proxy  Built
+ organizer-stack-team2-api  Built
+ organizer-stack-team10-api  Built
+ organizer-stack-team9-db  Built
+ organizer-stack-tournament-display  Built
+ organizer-stack-team4-ide  Built
+ organizer-stack-team8-db  Built
+ organizer-stack-team2-ide  Built
+ organizer-stack-team10-file  Built
+ organizer-stack-team7-ide  Built
+ Container team9-file  Recreate
+ Container team8-file  Recreate
+ Container team5-proxy  Recreate
+ Container team4-db  Recreate
+ Container team2-file  Recreate
+ Container team2-db  Recreate
+ Container team4-file  Recreate
+ Container team5-web  Recreate
+ Container team7-file  Recreate
+ Container team10-web  Recreate
+ Container team10-db  Recreate
+ Container team2-proxy  Recreate
+ Container team6-db  Recreate
+ Container team9-db  Recreate
+ Container team9-ide  Recreate
+ Container team8-web  Recreate
+ Container team8-ide  Recreate
+ Container team2-web  Recreate
+ Container team4-proxy  Recreate
+ Container team4-web  Recreate
+ Container team9-proxy  Recreate
+ Container team6-api  Recreate
+ Container team3-proxy  Recreate
+ Container team6-proxy  Recreate
+ Container team4-api  Recreate
+ Container team10-proxy  Recreate
+ Container team1-file  Recreate
+ Container team3-file  Recreate
+ Container team1-proxy  Recreate
+ Container team3-web  Recreate
+ Container team1-ide  Recreate
+ Container team5-api  Recreate
+ Container team1-web  Recreate
+ Container team10-api  Recreate
+ Container team5-ide  Recreate
+ Container team9-api  Recreate
+ Container team10-ide  Recreate
+ Container team7-db  Recreate
+ Container team6-ide  Recreate
+ Container team1-db  Recreate
+ Container team3-db  Recreate
+ Container team3-ide  Recreate
+ Container team10-file  Recreate
+ Container team6-web  Recreate
+ Container team7-proxy  Recreate
+ Container team8-api  Recreate
+ Container team8-db  Recreate
+ Container team1-api  Recreate
+ Container team2-api  Recreate
+ Container team4-ide  Recreate
+ Container team2-ide  Recreate
+ Container team7-ide  Recreate
+ Container team6-file  Recreate
+ Container team5-file  Recreate
+ Container team7-web  Recreate
+ Container team9-web  Recreate
+ Container team5-db  Recreate
+ Container team3-api  Recreate
+ Container team7-api  Recreate
+ Container team8-proxy  Recreate
+ Container orchestrator  Recreate
+ Container team1-db  Recreated
+ Container team5-web  Recreated
+ Container team5-db  Recreated
+ Container team6-file  Recreated
+ Container team5-api  Recreated
+ Container team3-db  Recreated
+ Container team3-web  Recreated
+ Container team6-web  Recreated
+ Container team1-file  Recreated
+ Container team4-proxy  Recreated
+ Container team2-proxy  Recreated
+ Container team6-db  Recreated
+ Container team1-ide  Recreated
+ Container team2-api  Recreated
+ Container team4-api  Recreated
+ Container team2-db  Recreated
+ Container team5-file  Recreated
+ Container team4-file  Recreated
+ Container team1-api  Recreated
+ Container team3-ide  Recreated
+ Container team4-ide  Recreated
+ Container team2-file  Recreated
+ Container team5-proxy  Recreated
+ Container team3-proxy  Recreated
+ Container team5-ide  Recreated
+ Container team1-proxy  Recreated
+ Container team4-db  Recreated
+ Container team2-ide  Recreated
+ Container team2-web  Recreated
+ Container team6-proxy  Recreated
+ Container team6-api  Recreated
+ Container team4-web  Recreated
+ Container team1-web  Recreated
+ Container team3-file  Recreated
+ Container team3-api  Recreated
+ Container team7-proxy  Recreated
+ Container team9-proxy  Recreated
+ Container team8-proxy  Recreated
+ Container team10-proxy  Recreated
+ Container team6-ide  Recreated
+ Container team8-db  Recreated
+ Container team7-web  Recreated
+ Container team10-db  Recreated
+ Container team8-web  Recreated
+ Container team8-api  Recreated
+ Container team9-web  Recreated
+ Container team9-api  Recreated
+ Container team10-web  Recreated
+ Container team9-file  Recreated
+ Container team8-file  Recreated
+ Container team9-db  Recreated
+ Container team7-file  Recreated
+ Container team7-api  Recreated
+ Container team7-db  Recreated
+ Container team10-file  Recreated
+ Container orchestrator  Recreated
+ Container tournament-display  Recreate
+ Container admin-dashboard  Recreate
+ Container team10-api  Recreated
+ Container team9-ide  Recreated
+ Container team7-ide  Recreated
+ Container team10-ide  Recreated
+ Container team8-ide  Recreated
+ Container tournament-display  Recreated
+ Container admin-dashboard  Recreated
+ Container team10-proxy  Starting
+ Container team10-ide  Starting
+ Container team10-file  Starting
+ Container team10-web  Starting
+ Container team10-db  Starting
+ Container orchestrator  Starting
+ Container team10-api  Starting
+ Container team10-web  Started
+ Container team10-api  Started
+ Container team10-db  Started
+ Container team10-ide  Started
+ Container orchestrator  Started
+ Container admin-dashboard  Starting
+ Container tournament-display  Starting
+ Container team10-file  Started
+ Container team10-proxy  Started
+ Container admin-dashboard  Started
+ Container tournament-display  Started
+Build mode: cached images (no forced rebuild)
+ Container orchestrator  Running
+ Container team10-file  Running
+ Container team10-ide  Running
+ Container team9-proxy  Creating
+ Container team2-api  Creating
+ Container team6-proxy  Creating
+ Container team5-ide  Creating
+ Container team1-file  Creating
+ Container team7-ide  Creating
+ Container team1-web  Creating
+ Container team5-db  Creating
+ Container team4-api  Creating
+ Container team4-ide  Creating
+ Container team1-api  Creating
+ Container team9-api  Creating
+ Container team3-proxy  Creating
+ Container team9-db  Creating
+ Container team2-proxy  Creating
+ Container team2-ide  Creating
+ Container team1-proxy  Creating
+ Container team7-proxy  Creating
+ Container team4-web  Creating
+ Container team6-ide  Creating
+ Container team2-db  Creating
+ Container team8-ide  Creating
+ Container team8-db  Creating
+ Container team5-web  Creating
+ Container team1-db  Creating
+ Container team4-file  Creating
+ Container admin-dashboard  Running
+ Container tournament-display  Running
+ Container team10-db  Running
+ Container team9-web  Creating
+ Container team3-api  Creating
+ Container team1-ide  Creating
+ Container team3-file  Creating
+ Container team5-file  Creating
+ Container team8-api  Creating
+ Container team8-file  Creating
+ Container team4-db  Creating
+ Container team7-db  Creating
+ Container team2-file  Creating
+ Container team10-web  Running
+ Container team9-file  Creating
+ Container team6-db  Creating
+ Container team5-api  Creating
+ Container team4-proxy  Creating
+ Container team10-proxy  Running
+ Container team3-db  Creating
+ Container team8-web  Creating
+ Container team7-web  Creating
+ Container team3-ide  Creating
+ Container team8-proxy  Creating
+ Container team6-web  Creating
+ Container team9-ide  Creating
+ Container team3-web  Creating
+ Container team6-file  Creating
+ Container team10-api  Running
+ Container team2-web  Creating
+ Container team6-api  Creating
+ Container team5-proxy  Creating
+ Container team7-file  Creating
+ Container team7-api  Creating
+ Container team1-file  Created
+ Container team6-api  Created
+ Container team4-web  Created
+ Container team7-proxy  Created
+ Container team2-file  Created
+ Container team4-db  Created
+ Container team9-db  Created
+ Container team3-file  Created
+ Container team3-db  Created
+ Container team6-file  Created
+ Container team1-web  Created
+ Container team8-web  Created
+ Container team3-api  Created
+ Container team4-file  Created
+ Container team8-api  Created
+ Container team8-ide  Created
+ Container team4-ide  Created
+ Container team6-ide  Created
+ Container team2-ide  Created
+ Container team2-db  Created
+ Container team1-ide  Created
+ Container team4-proxy  Created
+ Container team9-api  Created
+ Container team5-db  Created
+ Container team9-ide  Created
+ Container team6-web  Created
+ Container team5-ide  Created
+ Container team1-proxy  Created
+ Container team3-ide  Created
+ Container team9-proxy  Created
+ Container team7-file  Created
+ Container team5-proxy  Created
+ Container team8-proxy  Created
+ Container team7-ide  Created
+ Container team4-api  Created
+ Container team5-api  Created
+ Container team5-file  Created
+ Container team2-api  Created
+ Container team1-db  Created
+ Container team7-api  Created
+ Container team2-web  Created
+ Container team2-proxy  Created
+ Container team3-proxy  Created
+ Container team8-db  Created
+ Container team3-web  Created
+ Container team6-proxy  Created
+ Container team1-api  Created
+ Container team7-db  Created
+ Container team8-file  Created
+ Container team9-file  Created
+ Container team5-web  Created
+ Container team9-web  Created
+ Container team6-db  Created
+ Container team7-web  Created
+ Container team1-ide  Starting
+ Container team6-ide  Starting
+ Container team4-db  Starting
+ Container team7-db  Starting
+ Container team2-db  Starting
+ Container team9-ide  Starting
+ Container team3-file  Starting
+ Container team8-file  Starting
+ Container team6-api  Starting
+ Container team5-proxy  Starting
+ Container team7-web  Starting
+ Container team9-api  Starting
+ Container team9-proxy  Starting
+ Container team2-api  Starting
+ Container team3-proxy  Starting
+ Container team5-ide  Starting
+ Container team9-web  Starting
+ Container team1-proxy  Starting
+ Container team7-ide  Starting
+ Container team2-web  Starting
+ Container team9-file  Starting
+ Container team2-file  Starting
+ Container team6-file  Starting
+ Container team6-web  Starting
+ Container team6-db  Starting
+ Container team4-proxy  Starting
+ Container team5-web  Starting
+ Container team1-file  Starting
+ Container team1-web  Starting
+ Container team8-api  Starting
+ Container team1-db  Starting
+ Container team3-ide  Starting
+ Container team3-api  Starting
+ Container team1-api  Starting
+ Container team7-file  Starting
+ Container team3-web  Starting
+ Container team5-file  Starting
+ Container team5-api  Starting
+ Container team3-db  Starting
+ Container team8-ide  Starting
+ Container team8-proxy  Starting
+ Container team4-file  Starting
+ Container team6-proxy  Starting
+ Container team7-proxy  Starting
+ Container team5-db  Starting
+ Container team2-proxy  Starting
+ Container team8-db  Starting
+ Container team7-api  Starting
+ Container team2-ide  Starting
+ Container team9-db  Starting
+ Container team8-web  Starting
+ Container team4-api  Starting
+ Container team4-web  Starting
+ Container team4-ide  Starting
+ Container team3-web  Started
+ Container team4-api  Started
+ Container team6-ide  Started
+ Container team7-web  Started
+ Container team2-ide  Started
+ Container team6-web  Started
+ Container team4-ide  Started
+ Container team9-db  Started
+ Container team3-ide  Started
+ Container team1-db  Started
+ Container team4-file  Started
+ Container team1-web  Started
+ Container team1-ide  Started
+ Container team8-api  Started
+ Container team1-api  Started
+ Container team3-db  Started
+ Container team8-file  Started
+ Container team5-file  Started
+ Container team2-web  Started
+ Container team6-file  Started
+ Container team5-api  Started
+ Container team3-file  Started
+ Container team5-db  Started
+ Container team1-file  Started
+ Container team9-api  Started
+ Container team8-web  Started
+ Container team2-file  Started
+ Container team5-web  Started
+ Container team5-proxy  Started
+ Container team7-ide  Started
+ Container team9-proxy  Started
+ Container team6-api  Started
+ Container team3-proxy  Started
+ Container team7-file  Started
+ Container team5-ide  Started
+ Container team7-api  Started
+ Container team4-web  Started
+ Container team9-file  Started
+ Container team3-api  Started
+ Container team7-proxy  Started
+ Container team2-api  Started
+ Container team8-ide  Started
+ Container team4-proxy  Started
+ Container team9-ide  Started
+ Container team6-db  Started
+ Container team7-db  Started
+ Container team4-db  Started
+ Container team1-proxy  Started
+ Container team2-db  Started
+ Container team9-web  Started
+ Container team8-proxy  Started
+ Container team8-db  Started
+ Container team6-proxy  Started
+ Container team2-proxy  Started
+
+Waiting for orchestrator API to become ready...
+in ‚tait inattendu.

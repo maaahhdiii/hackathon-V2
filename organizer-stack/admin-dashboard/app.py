@@ -2,7 +2,9 @@ import os
 import re
 import threading
 import logging
+import time
 
+import docker
 import requests
 from flask import Flask, Response, jsonify, render_template, request
 from flask_cors import CORS
@@ -16,6 +18,13 @@ log = logging.getLogger("admin-dashboard")
 ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://127.0.0.1:9000").rstrip("/")
 SECRET = os.getenv("HACKATHON_SECRET", "HACKATHON_SECRET_2025")
 MAX_TEAMS = int(os.getenv("MAX_TEAMS", os.getenv("TEAM_SLOTS", "10")))
+AUTO_STOP_TEAMS_ON_BOOT = os.getenv("AUTO_STOP_TEAMS_ON_BOOT", "true").lower() in {"1", "true", "yes", "on"}
+AUTO_STOP_WAIT_SECONDS = int(os.getenv("AUTO_STOP_WAIT_SECONDS", "60"))
+COMPOSE_PROJECT_NAME = os.getenv("COMPOSE_PROJECT_NAME", "organizer-stack")
+BATTLE_NETWORK = f"{COMPOSE_PROJECT_NAME}_battle-net"
+MANAGEMENT_NETWORK = f"{COMPOSE_PROJECT_NAME}_management-net"
+
+_docker_client = None
 
 
 def team_runtime_info(team_no: int):
@@ -28,10 +37,234 @@ def team_runtime_info(team_no: int):
     }
 
 
+def get_docker_client():
+    global _docker_client
+    if _docker_client is None:
+        _docker_client = docker.from_env()
+    return _docker_client
+
+
+def team_container_names(team_no: int):
+    base = f"team{team_no}"
+    return [
+        f"{base}-web",
+        f"{base}-api",
+        f"{base}-file",
+        f"{base}-db",
+        f"{base}-proxy",
+        f"{base}-ide",
+    ]
+
+
+def team_image_name(team_no: int, service: str):
+    return f"{COMPOSE_PROJECT_NAME}-team{team_no}-{service}"
+
+
+def connect_network_with_retry(container, network_name: str, retries: int = 5):
+    client = get_docker_client()
+    network = client.networks.get(network_name)
+    for _ in range(retries):
+        try:
+            container.reload()
+            current_networks = (container.attrs.get("NetworkSettings", {}).get("Networks", {}) or {}).keys()
+            if network_name in current_networks:
+                return
+            network.connect(container)
+            return
+        except Exception:
+            time.sleep(0.3)
+    raise RuntimeError(f"failed to connect container {container.name} to network {network_name}")
+
+
+def create_team_container(team_no: int, service: str):
+    client = get_docker_client()
+    name = f"team{team_no}-{service}"
+    info = team_runtime_info(team_no)
+
+    primary_network = BATTLE_NETWORK
+
+    common_kwargs = {
+        "image": team_image_name(team_no, service),
+        "name": name,
+        "detach": True,
+        "network": primary_network,
+        "restart_policy": {"Name": "unless-stopped"},
+    }
+
+    if service in {"web", "api", "file", "db"}:
+        common_kwargs["environment"] = {"HACKATHON_SECRET": SECRET}
+    elif service == "proxy":
+        common_kwargs["ports"] = {"80/tcp": info["proxy_port"]}
+        common_kwargs["environment"] = {"TEAM_NO": str(team_no)}
+    elif service == "ide":
+        primary_network = MANAGEMENT_NETWORK
+        common_kwargs["network"] = primary_network
+        common_kwargs["ports"] = {"8080/tcp": info["ide_port"]}
+        common_kwargs["environment"] = {
+            "TEAM_ID": str(info["team_id"]),
+            "TEAM_NAME": info["name"],
+            "ORCHESTRATOR_URL": "http://orchestrator:9000",
+            "HACKATHON_SECRET": SECRET,
+            "MY_PROXY_PORT": str(info["proxy_port"]),
+            "SERVER_IP": os.getenv("SERVER_IP", "192.168.1.100"),
+        }
+        common_kwargs["volumes"] = {
+            f"{COMPOSE_PROJECT_NAME}_team{team_no}-code": {"bind": "/app/workspace", "mode": "rw"}
+        }
+
+    container = client.containers.run(**common_kwargs)
+    if service == "proxy":
+        connect_network_with_retry(container, MANAGEMENT_NETWORK)
+    return container
+
+
+def start_team_runtime(team_no: int):
+    client = get_docker_client()
+    started = []
+    missing = []
+    services = ["web", "api", "file", "db", "proxy", "ide"]
+
+    for service in services:
+        name = f"team{team_no}-{service}"
+        try:
+            container = client.containers.get(name)
+        except docker.errors.NotFound:
+            try:
+                create_team_container(team_no, service)
+                started.append(name)
+                continue
+            except docker.errors.ImageNotFound:
+                missing.append(f"{name} image:{team_image_name(team_no, service)}")
+                continue
+
+        container.reload()
+        if container.status != "running":
+            container.start()
+            started.append(name)
+
+    if missing:
+        raise RuntimeError(f"missing team containers: {', '.join(missing)}")
+
+    return started
+
+
+def stop_team_runtime(team_no: int):
+    client = get_docker_client()
+    for name in team_container_names(team_no):
+        try:
+            container = client.containers.get(name)
+        except docker.errors.NotFound:
+            continue
+
+        try:
+            container.reload()
+            if container.status == "running":
+                container.stop(timeout=10)
+        except Exception as exc:
+            log.warning("Failed to stop container %s: %s", name, exc)
+
+
+def remove_team_runtime(team_no: int):
+    client = get_docker_client()
+    for name in team_container_names(team_no):
+        try:
+            container = client.containers.get(name)
+        except docker.errors.NotFound:
+            continue
+
+        try:
+            container.remove(force=True)
+        except Exception as exc:
+            log.warning("Failed to remove container %s: %s", name, exc)
+
+
+def stop_all_team_runtimes():
+    for team_no in range(1, MAX_TEAMS + 1):
+        try:
+            stop_team_runtime(team_no)
+        except Exception as exc:
+            log.warning("Failed stopping runtime for team %s: %s", team_no, exc)
+
+
+def remove_all_team_runtimes():
+    for team_no in range(1, MAX_TEAMS + 1):
+        try:
+            remove_team_runtime(team_no)
+        except Exception as exc:
+            log.warning("Failed removing runtime for team %s: %s", team_no, exc)
+
+
+def get_running_team_containers():
+    client = get_docker_client()
+    running = []
+    for team_no in range(1, MAX_TEAMS + 1):
+        for name in team_container_names(team_no):
+            try:
+                container = client.containers.get(name)
+            except docker.errors.NotFound:
+                continue
+            container.reload()
+            if container.status == "running":
+                running.append(name)
+    return running
+
+
+def all_team_containers_exist():
+    client = get_docker_client()
+    expected = sum(len(team_container_names(team_no)) for team_no in range(1, MAX_TEAMS + 1))
+    found = 0
+    for team_no in range(1, MAX_TEAMS + 1):
+        for name in team_container_names(team_no):
+            try:
+                client.containers.get(name)
+                found += 1
+            except docker.errors.NotFound:
+                pass
+    return found == expected
+
+
+def bootstrap_runtime_state():
+    if not AUTO_STOP_TEAMS_ON_BOOT:
+        return
+
+    deadline = time.time() + max(5, AUTO_STOP_WAIT_SECONDS)
+    seen_running = False
+    while time.time() < deadline:
+        try:
+            stop_all_team_runtimes()
+            remove_all_team_runtimes()
+            running = get_running_team_containers()
+            if running:
+                seen_running = True
+            if not running:
+                if seen_running:
+                    log.info("Stopped all team runtimes at boot (default 0 active teams).")
+                else:
+                    log.info("No team runtimes active at boot.")
+                return
+            log.warning("Some team runtimes still running, retrying: %s", ", ".join(running))
+            time.sleep(1)
+        except Exception as exc:
+            log.warning("Runtime bootstrap retry: %s", exc)
+            time.sleep(1)
+
+    running = get_running_team_containers()
+    if running:
+        log.warning("Auto-stop timeout reached; still running: %s", ", ".join(running))
+
+
 def register_test_teams(count=10, ip_prefix="192.168.1.", ip_start=101, team_prefix="Team", register_mode="proxy_name"):
     results = []
     for idx in range(count):
         team_no = idx + 1
+        runtime_error = None
+
+        if register_mode == "proxy_name":
+            try:
+                start_team_runtime(team_no)
+            except Exception as exc:
+                runtime_error = str(exc)
+
         if register_mode == "proxy_name":
             ip = f"team{team_no}-proxy"
         else:
@@ -41,6 +274,10 @@ def register_test_teams(count=10, ip_prefix="192.168.1.", ip_start=101, team_pre
             "ip": ip,
         }
         try:
+            if runtime_error:
+                results.append({"ip": ip, "ok": False, "error": runtime_error})
+                continue
+
             resp = requests.post(f"{ORCHESTRATOR_URL}/register", json=payload, timeout=5)
             if resp.ok:
                 results.append({"ip": ip, "ok": True})
@@ -150,6 +387,15 @@ def api_delete_team(team_ip):
     body = {"team_ip": team_ip, "secret": SECRET}
     try:
         resp = requests.delete(f"{ORCHESTRATOR_URL}/admin/remove_team", json=body, timeout=5)
+        if resp.ok:
+            match = re.match(r"team(\d+)-proxy$", team_ip)
+            if match:
+                team_no = int(match.group(1))
+                try:
+                    stop_team_runtime(team_no)
+                    remove_team_runtime(team_no)
+                except Exception as exc:
+                    log.warning("Failed stopping runtime for team %s: %s", team_no, exc)
         return safe_json_response(resp)
     except Exception as exc:
         return jsonify({"ok": False, "error": str(exc)}), 500
@@ -250,6 +496,16 @@ def api_add_one_team():
         return jsonify({"ok": False, "error": f"team_no must be between 1 and {MAX_TEAMS}"}), 400
 
     info = team_runtime_info(team_no)
+
+    try:
+        start_team_runtime(team_no)
+    except Exception as exc:
+        try:
+            remove_team_runtime(team_no)
+        except Exception:
+            pass
+        return jsonify({"ok": False, "error": f"failed to start team runtime: {exc}"}), 500
+
     payload_register = {
         "team_name": team_name or info["name"],
         "ip": info["ip"],
@@ -271,7 +527,7 @@ def api_add_one_team():
 @app.post("/api/battle/hackathon_day_start")
 def api_hackathon_day_start():
     payload = request.get_json(silent=True) or {}
-    count = int(payload.get("count", 10))
+    count = int(payload.get("count", 0))
     ip_prefix = str(payload.get("ip_prefix", "192.168.1."))
     ip_start = int(payload.get("ip_start", 101))
     team_prefix = str(payload.get("team_prefix", "Team"))
@@ -280,15 +536,18 @@ def api_hackathon_day_start():
     if register_mode not in ("proxy_name", "ip"):
         return jsonify({"ok": False, "error": "register_mode must be 'proxy_name' or 'ip'"}), 400
 
-    count = max(1, min(50, count))
-    register_results = register_test_teams(
-        count=count,
-        ip_prefix=ip_prefix,
-        ip_start=ip_start,
-        team_prefix=team_prefix,
-        register_mode=register_mode,
-    )
-    ok_count = sum(1 for item in register_results if item.get("ok"))
+    register_results = []
+    ok_count = 0
+    if count > 0:
+        count = min(50, count)
+        register_results = register_test_teams(
+            count=count,
+            ip_prefix=ip_prefix,
+            ip_start=ip_start,
+            team_prefix=team_prefix,
+            register_mode=register_mode,
+        )
+        ok_count = sum(1 for item in register_results if item.get("ok"))
 
     trigger_battle_start_async()
 
@@ -328,4 +587,5 @@ def api_stream_proxy():
 
 
 if __name__ == "__main__":
+    bootstrap_runtime_state()
     app.run(host="0.0.0.0", port=4000, threaded=True)

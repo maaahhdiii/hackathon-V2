@@ -1,0 +1,55 @@
+#!/bin/sh
+set -eu
+
+if [ -n "${TEAM_NO:-}" ]; then
+  cat > /etc/nginx/conf.d/default.conf <<EOF
+server {
+    listen 80;
+    location = / {
+        root /usr/share/nginx/html;
+        try_files /status.html =404;
+    }
+    location /proxy/current {
+        proxy_pass http://orchestrator:9000/current;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 30s;
+    }
+    location /web/ {
+        proxy_pass http://team${TEAM_NO}-web:8001/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 30s;
+    }
+    location /api/ {
+        proxy_pass http://team${TEAM_NO}-api:8002/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 30s;
+    }
+    location /file/ {
+        proxy_pass http://team${TEAM_NO}-file:8003/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 30s;
+    }
+    location /db/ {
+        proxy_pass http://team${TEAM_NO}-db:8004/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 30s;
+    }
+    location /nginx-health {
+        return 200 '{"status":"ok"}';
+        add_header Content-Type application/json;
+    }
+}
+EOF
+fi
+
+exec nginx -g 'daemon off;'

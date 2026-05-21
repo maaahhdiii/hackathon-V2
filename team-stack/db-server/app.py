@@ -5,7 +5,7 @@ import threading
 import time
 from pathlib import Path
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, render_template_string, request
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
@@ -131,6 +131,77 @@ def handle_exception(error):
         message = error.description
     log.exception("Request failed: %s", error)
     return jsonify({"ok": False, "error": message}), code
+
+
+@app.get("/")
+def service_ui():
+        return render_template_string(
+                """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DB Service UI</title>
+    <style>
+        body { font-family: Consolas, monospace; background: #0f172a; color: #e2e8f0; margin: 0; padding: 16px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+        .card { background: #111827; border: 1px solid #334155; border-radius: 8px; padding: 12px; }
+        input, select, button { width: 100%; margin-top: 6px; margin-bottom: 8px; padding: 6px; background: #020617; color: #e2e8f0; border: 1px solid #334155; border-radius: 6px; }
+        button { cursor: pointer; background: #1d4ed8; }
+        pre { background: #020617; border: 1px solid #334155; border-radius: 6px; padding: 8px; min-height: 120px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h2>DB Vulnerable Service</h2>
+    <div class="grid">
+        <div class="card">
+            <h3>Health and HP</h3>
+            <input id="secret" placeholder="HACKATHON_SECRET" value="HACKATHON_SECRET_2025" />
+            <button onclick="callApi('GET','/health')">Get Health</button>
+            <input id="amount" type="number" value="5" />
+            <button onclick="callApi('POST','/damage',{secret:val('secret'),amount:num('amount')})">Damage</button>
+            <button onclick="callApi('POST','/heal',{secret:val('secret'),amount:num('amount')})">Heal</button>
+        </div>
+        <div class="card">
+            <h3>Vulnerabilities</h3>
+            <select id="vuln">
+                <option value="sqli">sqli</option>
+                <option value="priv_esc">priv_esc</option>
+            </select>
+            <button onclick="callApi('POST','/flags/activate',{secret:val('secret'),vuln:val('vuln')})">Activate</button>
+            <button onclick="callApi('POST','/flags/deactivate',{secret:val('secret'),vuln:val('vuln')})">Deactivate</button>
+            <button onclick="callApi('POST','/attack',{vulnerability_type:val('vuln'),amount:8})">Attack</button>
+            <button onclick="callApi('POST','/defend',{vulnerability_type:val('vuln'),action:'disable'})">Defend Disable</button>
+        </div>
+        <div class="card">
+            <h3>DB Endpoints</h3>
+            <input id="search" value="a" />
+            <button onclick="callApi('POST','/query',{search:val('search')})">Search Users</button>
+            <input id="uid" type="number" value="1" />
+            <button onclick="callApi('GET','/user/'+num('uid'))">Get User</button>
+            <input id="requester" type="number" value="2" />
+            <button onclick="callApi('POST','/user/'+num('uid')+'/promote',{requester_id:num('requester')})">Promote User</button>
+            <button onclick="callApi('GET','/tables')">List Tables</button>
+        </div>
+    </div>
+    <pre id="out">Ready.</pre>
+    <script>
+        const out = document.getElementById('out');
+        const val = (id) => document.getElementById(id).value;
+        const num = (id) => Number(document.getElementById(id).value || 0);
+        async function callApi(method, path, body) {
+            const opts = { method, headers: {} };
+            if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+            const r = await fetch(path, opts);
+            const t = await r.text();
+            out.textContent = method + ' ' + path + '\n' + t;
+        }
+    </script>
+</body>
+</html>
+                """
+        )
 
 
 @app.get("/health")

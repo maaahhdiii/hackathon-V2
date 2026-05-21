@@ -240,8 +240,8 @@ sequenceDiagram
   participant Orch as orchestrator (:9000)
   participant Teams as Team proxies/services
 
-  Organizer->>AdminUI: Click "Add 10 Teams"
-  AdminUI->>Orch: POST /register (loop x10)
+  Organizer->>AdminUI: Click "Add Team" (repeat for each team)
+  AdminUI->>Orch: POST /register (one request per team)
   Orch-->>AdminUI: registration results
 
   Organizer->>AdminUI: Click "Start Battle"
@@ -348,7 +348,12 @@ Project root:
 
 - `nginx-configs/`
   - 10 proxy configs (`team1.conf` ... `team10.conf`).
-  - Each config routes team proxy traffic to that team's active service endpoint.
+  - Each config routes path prefixes to fixed services:
+    - `/web/*` -> team web
+    - `/api/*` -> team api
+    - `/file/*` -> team file
+    - `/db/*` -> team db
+    - `/` defaults to web
 
 ### 3.2 `team-stack/`
 
@@ -447,7 +452,25 @@ Windows note:
 
 ## 6. How to start the platform (step by step)
 
-From project root go to organizer stack and start all containers:
+Recommended (Windows): use the launcher from project root.
+
+`start-platform.bat` starts the full stack and pre-registers teams only when you pass a number.
+
+- Start with no pre-registered teams (recommended for event-day CRUD):
+
+```powershell
+Set-Location "d:\hckathoun V2\hackathon"
+./start-platform.bat
+```
+
+- Start and pre-register all 10 teams:
+
+```powershell
+Set-Location "d:\hckathoun V2\hackathon"
+./start-platform.bat 10
+```
+
+Manual fallback (without launcher):
 
 ```powershell
 Set-Location "d:\hckathoun V2\hackathon\organizer-stack"
@@ -455,7 +478,6 @@ docker compose up -d --build
 ```
 
 Check status:
-
 ```powershell
 docker compose ps
 ```
@@ -490,7 +512,7 @@ docker compose down -v
 5. Bots attack and defend through each team proxy.
 6. Events are tracked and scores are continuously recomputed.
 
-Battle duration = number of slots × slot duration.
+Battle duration = number of slots x slot duration.
 With 4 slots and 450 seconds each, total is 1800 seconds (30 minutes).
 
 ---
@@ -501,7 +523,7 @@ With 4 slots and 450 seconds each, total is 1800 seconds (30 minutes).
 
 Useful endpoints:
 
-- `POST /register` -> register a team (name + proxy IP string)
+- `POST /register` -> register a team (supports `team_name`, `ip`, optional `team_id`, `proxy_port`, `ide_port`)
 - `POST /battle/start` -> start battle
 - `POST /battle/stop` -> stop battle
 - `GET /current` -> active service and timing
@@ -524,6 +546,7 @@ These proxy to orchestrator for easier UI control:
 - `GET /api/teams`
 - `POST /api/battle/start`
 - `POST /api/battle/stop`
+- `POST /api/teams/add_one`
 - `POST /api/teams/add_bulk`
 - `POST /api/battle/hackathon_day_start`
 - `POST /api/teams/rename`
@@ -546,13 +569,18 @@ These proxy to orchestrator for easier UI control:
 
 ### 9.4 Team service/proxy APIs (`:910x`)
 
-The proxy forwards to the currently active team service. Typical routes include:
+Proxy routing is path-based:
 
-- `GET /health`
-- `POST /flags/activate`
-- `POST /flags/deactivate`
-- `POST /damage`
-- `POST /heal`
+- `/<service>/...` where service is `web`, `api`, `file`, or `db`
+- `/...` (without prefix) goes to team web service
+
+Typical routes include:
+
+- `GET /web/health`, `GET /api/health`, `GET /file/health`, `GET /db/health`
+- `POST /web/flags/activate` (or `/api/...`, `/file/...`, `/db/...`)
+- `POST /web/flags/deactivate` (or `/api/...`, `/file/...`, `/db/...`)
+- `POST /web/damage` and `POST /web/heal` (or `/api/...`, `/file/...`, `/db/...`)
+- `POST /web/attack` and `POST /web/defend` compatibility endpoints (also available on other services)
 
 Some service-specific routes exist too (`/search`, `/users`, `/upload`, etc.), depending on service.
 
@@ -600,18 +628,26 @@ Not allowed:
 
 ## 12. Common operations for organizers
 
-### Register all teams quickly
+### Add one team (recommended day-of)
+
+Use the Admin UI Add Team controls, or API:
+
+```powershell
+Invoke-RestMethod -Method POST -Uri "http://localhost:4000/api/teams/add_one" -ContentType "application/json" -Body '{"team_no":1,"team_name":"Team 1"}'
+```
+
+### Register all teams quickly (bulk)
 
 From admin UI button, or API:
 
 ```powershell
-Invoke-RestMethod -Method POST -Uri "http://localhost:4000/api/teams/add_bulk" -ContentType "application/json" -Body '{"count":10,"ip_prefix":"192.168.1.","ip_start":101,"team_prefix":"Team"}'
+Invoke-RestMethod -Method POST -Uri "http://localhost:4000/api/teams/add_bulk" -ContentType "application/json" -Body '{"count":10,"team_prefix":"Team","register_mode":"proxy_name"}'
 ```
 
 ### One-click hackathon start
 
 ```powershell
-Invoke-RestMethod -Method POST -Uri "http://localhost:4000/api/battle/hackathon_day_start" -ContentType "application/json" -Body '{"count":10}'
+Invoke-RestMethod -Method POST -Uri "http://localhost:4000/api/battle/hackathon_day_start" -ContentType "application/json" -Body '{"count":10,"team_prefix":"Team","register_mode":"proxy_name"}'
 ```
 
 ### Check running containers quickly
@@ -642,7 +678,7 @@ $ps = docker compose ps --format json | ConvertFrom-Json
 
 ### Problem: no teams in scoreboard
 
-- Register teams first (`/api/teams/add_bulk`).
+- Register teams first (preferred: `/api/teams/add_one`, bulk: `/api/teams/add_bulk`).
 - Then start battle.
 
 ### Problem: bots run but do nothing
@@ -659,7 +695,8 @@ Main values from compose:
 
 - `HACKATHON_SECRET`: shared token for protected actions.
 - `SLOT_DURATION`: seconds per service slot.
-- `TEAM_COUNT`: expected team count.
+- `TEAM_COUNT`: pre-registration count used by startup script/compose defaults.
+- `MAX_TEAMS` / `TEAM_SLOTS`: maximum allowed team slots for admin add-one validation.
 - `SERVER_IP`: host IP shown to IDE context and target generation.
 
 If host IP changes, update `SERVER_IP` env values and restart stack.
@@ -669,6 +706,7 @@ If host IP changes, update `SERVER_IP` env values and restart stack.
 ## 15. Where to read next
 
 - Participant guide: `PARTICIPANT_RULEBOOK.txt`
+- Event operations runbook: `HACKATHON_DAY_RUNBOOK.txt`
 - Orchestrator logic: `organizer-stack/orchestrator/orchestrator.py`
 - Admin backend: `organizer-stack/admin-dashboard/app.py`
 - Team IDE backend: `team-stack/bot-ide/ide_server.py`
@@ -678,9 +716,9 @@ If host IP changes, update `SERVER_IP` env values and restart stack.
 
 ## 16. Quick start for a complete first run
 
-1. Start stack with compose.
+1. Start stack with `start-platform.bat`.
 2. Open admin page at `http://localhost:4000`.
-3. Add 10 teams from admin controls.
+3. Add teams one by one from admin controls (or use bulk add).
 4. Start battle.
 5. Open display at `http://localhost:5000`.
 6. Open one team IDE (for example Team 1: `http://localhost:8100`).
