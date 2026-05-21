@@ -580,7 +580,7 @@ Typical routes include:
 - `POST /web/flags/activate` (or `/api/...`, `/file/...`, `/db/...`)
 - `POST /web/flags/deactivate` (or `/api/...`, `/file/...`, `/db/...`)
 - `POST /web/damage` and `POST /web/heal` (or `/api/...`, `/file/...`, `/db/...`)
-- `POST /web/attack` and `POST /web/defend` compatibility endpoints (also available on other services)
+- The generic `/attack` shortcut is disabled in the current event configuration. Participants should use the service-specific application routes described above.
 
 Some service-specific routes exist too (`/search`, `/users`, `/upload`, etc.), depending on service.
 

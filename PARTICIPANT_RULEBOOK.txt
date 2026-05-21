@@ -100,6 +100,8 @@ B) Your local team stack (via your proxy)
 Note:
 Your IDE starter bots already include examples for attacker and defender loops.
 
+Detailed endpoint-by-endpoint guidance is in [docs/PARTICIPANT_API_GUIDE.md](docs/PARTICIPANT_API_GUIDE.md).
+
 ============================================================
 6) BOT DEVELOPMENT RULES
 ============================================================

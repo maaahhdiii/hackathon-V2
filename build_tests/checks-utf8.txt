@@ -1,0 +1,2298 @@
+﻿---ORCH_CURRENT---
+{"active_service":"web","battle_elapsed":0,"battle_finished":false,"battle_remaining":0,"battle_started":false,"elapsed_seconds":0,"remaining_seconds":0,"slot":1,"teams_registered":0}
+---ADMIN_ROOT---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyber Battle // Command Console</title>
+  <style>
+    :root {
+      --bg: #06080d;
+      --bg-soft: #0b1018;
+      --panel: rgba(14, 20, 31, 0.9);
+      --panel-edge: #233349;
+      --text: #d8f7ff;
+      --muted: #7b97b0;
+      --accent: #00e6c3;
+      --accent-2: #2fb3ff;
+      --danger: #ff4d6d;
+      --warn: #ffc857;
+      --good: #53fca1;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Consolas", "Lucida Console", monospace;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(47, 179, 255, 0.18), transparent 32%),
+        radial-gradient(circle at 90% 0%, rgba(0, 230, 195, 0.12), transparent 28%),
+        linear-gradient(180deg, #05070b 0%, #060b11 45%, #05070b 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.03),
+        rgba(255, 255, 255, 0.03) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      opacity: 0.24;
+      mix-blend-mode: screen;
+    }
+
+    .glow-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      background-image:
+        linear-gradient(rgba(47, 179, 255, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(47, 179, 255, 0.2) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 42%, transparent 100%);
+    }
+
+    .page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 18px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header {
+      background: linear-gradient(130deg, rgba(16, 25, 38, 0.96), rgba(8, 14, 22, 0.96));
+      border: 1px solid var(--panel-edge);
+      border-radius: 14px;
+      box-shadow: 0 0 24px rgba(47, 179, 255, 0.15), inset 0 0 24px rgba(0, 230, 195, 0.08);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      border: 1px solid rgba(47, 179, 255, 0.45);
+      background: linear-gradient(160deg, rgba(7, 17, 27, 0.96), rgba(10, 22, 35, 0.96));
+      display: grid;
+      place-items: center;
+      box-shadow: inset 0 0 18px rgba(47, 179, 255, 0.2), 0 0 16px rgba(47, 179, 255, 0.12);
+    }
+
+    .title-wrap {
+      line-height: 1.1;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(21px, 2.8vw, 34px);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #c9f7ff;
+      text-shadow: 0 0 12px rgba(0, 230, 195, 0.42);
+      position: relative;
+    }
+
+    .title::after {
+      content: "// live control";
+      margin-left: 8px;
+      color: var(--accent);
+      font-size: 0.48em;
+      vertical-align: middle;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .status-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      border: 1px solid #29445f;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      text-transform: uppercase;
+      background: rgba(14, 26, 40, 0.9);
+      color: #cce9ff;
+    }
+
+    .chip.active {
+      border-color: rgba(83, 252, 161, 0.8);
+      color: #dfffea;
+      background: rgba(17, 57, 35, 0.86);
+      box-shadow: 0 0 12px rgba(83, 252, 161, 0.3);
+    }
+
+    .chip.service {
+      border-color: rgba(47, 179, 255, 0.8);
+      background: rgba(10, 36, 58, 0.9);
+    }
+
+    .timer {
+      color: var(--warn);
+      font-size: 13px;
+      letter-spacing: 0.7px;
+      border: 1px solid rgba(255, 200, 87, 0.5);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(57, 40, 7, 0.5);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .team-add {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .team-add input {
+      min-width: 120px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      color: #f4fbff;
+      border-radius: 10px;
+      padding: 9px 13px;
+      cursor: pointer;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      font-family: inherit;
+      font-size: 12px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-start {
+      background: linear-gradient(135deg, #118a61, #0db996);
+      border-color: rgba(83, 252, 161, 0.55);
+      box-shadow: 0 0 14px rgba(83, 252, 161, 0.28);
+    }
+
+    .btn-stop {
+      background: linear-gradient(135deg, #8f1f3f, #d23459);
+      border-color: rgba(255, 77, 109, 0.6);
+      box-shadow: 0 0 14px rgba(255, 77, 109, 0.28);
+    }
+
+    .btn-add {
+      background: linear-gradient(135deg, #1e4f8e, #2f83ff);
+      border-color: rgba(47, 179, 255, 0.6);
+      box-shadow: 0 0 14px rgba(47, 179, 255, 0.28);
+    }
+
+    .btn-day {
+      background: linear-gradient(135deg, #895b00, #d58d00);
+      border-color: rgba(255, 200, 87, 0.65);
+      box-shadow: 0 0 14px rgba(255, 200, 87, 0.25);
+    }
+
+    .section {
+      margin-top: 14px;
+      background: var(--panel);
+      border: 1px solid var(--panel-edge);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: inset 0 0 18px rgba(47, 179, 255, 0.06);
+    }
+
+    .section h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #a2e9ff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: linear-gradient(155deg, rgba(10, 17, 28, 0.95), rgba(8, 12, 20, 0.95));
+      border: 1px solid #273b55;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 0 18px rgba(0, 230, 195, 0.06);
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .name {
+      color: #d8f7ff;
+      text-shadow: 0 0 10px rgba(0, 230, 195, 0.25);
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .ip {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .score {
+      margin-top: 8px;
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--accent);
+      text-shadow: 0 0 16px rgba(0, 230, 195, 0.32);
+    }
+
+    .hp-group {
+      margin-top: 8px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .hp-item {
+      display: grid;
+      grid-template-columns: 54px 1fr 64px;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: #bed7eb;
+    }
+
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid #2c425f;
+      background: #070d14;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      transition: width 0.25s ease;
+    }
+
+    .controls-toggle {
+      margin-top: 10px;
+      width: 100%;
+      border: 1px solid #2c4562;
+      color: #cae7ff;
+      border-radius: 8px;
+      background: linear-gradient(130deg, rgba(18, 29, 45, 0.95), rgba(13, 21, 33, 0.95));
+      padding: 7px;
+      cursor: pointer;
+      font-family: inherit;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.8px;
+    }
+
+    .controls {
+      display: none;
+      margin-top: 8px;
+      border-top: 1px solid #253850;
+      padding-top: 8px;
+    }
+
+    .controls.open { display: block; }
+
+    .inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    select, input {
+      background: #0a121d;
+      color: #e3f7ff;
+      border: 1px solid #2d4562;
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-family: inherit;
+      min-width: 96px;
+    }
+
+    .small-btn {
+      border: 1px solid #325e87;
+      border-radius: 8px;
+      background: #1c4b84;
+      color: #edf8ff;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.7px;
+    }
+
+    .small-btn.remove {
+      border-color: #80394a;
+      background: #702135;
+    }
+
+    .events {
+      max-height: 320px;
+      overflow: auto;
+      border: 1px solid #27405b;
+      border-radius: 10px;
+      background: rgba(7, 13, 22, 0.94);
+      padding: 8px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .event {
+      padding: 7px 4px;
+      border-bottom: 1px solid rgba(39, 62, 88, 0.5);
+    }
+
+    .event:last-child { border-bottom: none; }
+    .event.exploit_success { color: #ff8ca1; }
+    .event.block { color: #7ef1ad; }
+    .event.patch { color: #8ad8ff; }
+    .event.heal { color: #74ffe0; }
+    .event.exploit_attempt { color: #9fb1c0; }
+
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      border: 1px solid #2e4865;
+      border-radius: 10px;
+      padding: 10px 14px;
+      background: rgba(8, 16, 26, 0.96);
+      display: none;
+      z-index: 100;
+      font-size: 12px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .toast.ok {
+      color: #91ffbf;
+      box-shadow: 0 0 16px rgba(83, 252, 161, 0.2);
+    }
+
+    .toast.err {
+      color: #ff9db0;
+      box-shadow: 0 0 16px rgba(255, 77, 109, 0.2);
+    }
+
+    @media (max-width: 1040px) {
+      .grid { grid-template-columns: 1fr; }
+      .brand-row { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-grid"></div>
+  <div class="page">
+    <div class="header">
+      <div class="brand-row">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 18L32 6L56 18V46L32 58L8 46V18Z" stroke="#2fb3ff" stroke-width="3"/>
+              <path d="M20 23H44V30H27V34H44V41H20V23Z" fill="#00e6c3"/>
+            </svg>
+          </div>
+          <div class="title-wrap">
+            <h1 class="title">Cyber Battle Admin</h1>
+            <div class="subtitle">Network intrusion command console</div>
+          </div>
+        </div>
+        <div class="status-strip">
+          <span id="battleStatus" class="chip">Idle</span>
+          <span id="activeService" class="chip service">Service: WEB</span>
+          <span id="countdown" class="timer">00:00</span>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-start" id="startBtn" type="button">Start Battle</button>
+        <button class="btn btn-stop" id="stopBtn" type="button">Stop Battle</button>
+        <button class="btn btn-day" id="dayStartBtn" type="button">Hackathon Day Start</button>
+      </div>
+
+      <div class="team-add">
+        <input id="teamNoInput" type="number" min="1" max="10" placeholder="Team number (1-10)" />
+        <input id="teamNameInput" type="text" placeholder="Team name (optional)" />
+        <button class="btn btn-add" id="addTeamBtn" type="button">Add Team</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Team Nodes</h3>
+      <div id="teamsGrid" class="grid"></div>
+    </div>
+
+    <div class="section">
+      <h3>Event Feed</h3>
+      <div id="events" class="events"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const toastEl = document.getElementById('toast');
+    const teamsGrid = document.getElementById('teamsGrid');
+    const eventsEl = document.getElementById('events');
+    const battleStatusEl = document.getElementById('battleStatus');
+    const activeServiceEl = document.getElementById('activeService');
+    const countdownEl = document.getElementById('countdown');
+
+    let latestTeams = [];
+    const openControls = new Set();
+
+    function showToast(message, ok = true) {
+      toastEl.textContent = message;
+      toastEl.className = `toast ${ok ? 'ok' : 'err'}`;
+      toastEl.style.display = 'block';
+      setTimeout(() => { toastEl.style.display = 'none'; }, 2400);
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, options);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.ok === false) {
+        throw new Error(data.error || `HTTP ${response.status}`);
+      }
+      return data;
+    }
+
+    function hpColor(pct) {
+      if (pct > 60) return '#53fca1';
+      if (pct >= 30) return '#ffc857';
+      return '#ff4d6d';
+    }
+
+    function fmtMMSS(sec) {
+      const s = Math.max(0, Number(sec || 0));
+      const m = String(Math.floor(s / 60)).padStart(2, '0');
+      const r = String(s % 60).padStart(2, '0');
+      return `${m}:${r}`;
+    }
+
+    async function startBattle() {
+      try {
+        await fetchJson('/api/battle/start', { method: 'POST' });
+        showToast('Battle started');
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function stopBattle() {
+      try {
+        await fetchJson('/api/battle/stop', { method: 'POST' });
+        showToast('Battle stopped');
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function addBulkTeams() {
+      try {
+        const data = await fetchJson('/api/teams/add_bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ count: 10, team_prefix: 'Team', register_mode: 'proxy_name' })
+        });
+        showToast(`Added ${data.registered}/${data.requested} teams`);
+        refreshTeamsAndEvents();
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function addOneTeam() {
+      const teamNo = Number(document.getElementById('teamNoInput').value);
+      const teamName = document.getElementById('teamNameInput').value.trim();
+
+      if (!Number.isInteger(teamNo) || teamNo < 1 || teamNo > 10) {
+        showToast('Team number must be between 1 and 10', false);
+        return;
+      }
+
+      try {
+        const data = await fetchJson('/api/teams/add_one', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ team_no: teamNo, team_name: teamName })
+        });
+        const newIp = data?.team?.ip;
+        if (newIp) openControls.add(newIp);
+        showToast(`Added ${data?.team?.team_name || data?.team?.name || ('Team ' + teamNo)}`);
+        await refreshTeamsAndEvents();
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function hackathonDayStart() {
+      try {
+        const data = await fetchJson('/api/battle/hackathon_day_start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ count: 0, team_prefix: 'Team', register_mode: 'proxy_name' })
+        });
+        showToast(`Day start queued: ${data.registered} teams`);
+        refreshTeamsAndEvents();
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function renameTeam(ip, oldName) {
+      const name = prompt('New team name', oldName);
+      if (!name) return;
+      try {
+        await fetchJson('/api/teams/rename', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ team_ip: ip, name })
+        });
+        showToast('Team renamed');
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function removeTeam(ip) {
+      if (!confirm(`Remove team ${ip}?`)) return;
+      try {
+        await fetchJson(`/api/teams/${encodeURIComponent(ip)}`, { method: 'DELETE' });
+        openControls.delete(ip);
+        showToast('Team removed');
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function setHp(ip) {
+      const service = document.getElementById(`svc-${ip}`).value;
+      const hp = Number(document.getElementById(`hp-${ip}`).value);
+      try {
+        await fetchJson(`/api/teams/${encodeURIComponent(ip)}/hp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ service, hp })
+        });
+        showToast('HP updated');
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function setScore(ip) {
+      const score = Number(document.getElementById(`score-${ip}`).value);
+      try {
+        await fetchJson(`/api/teams/${encodeURIComponent(ip)}/score`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ score })
+        });
+        showToast('Score override set');
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    function renderTeams(teams) {
+      const activeElement = document.activeElement;
+      const activeId = activeElement && activeElement.id ? activeElement.id : '';
+      const savedState = new Map();
+
+      teams.forEach((team) => {
+        const selectEl = document.getElementById(`svc-${team.ip}`);
+        const hpEl = document.getElementById(`hp-${team.ip}`);
+        const scoreEl = document.getElementById(`score-${team.ip}`);
+        const ctrlEl = document.getElementById(`ctrl-${team.ip}`);
+
+        savedState.set(team.ip, {
+          open: openControls.has(team.ip) || (ctrlEl && ctrlEl.classList.contains('open')),
+          service: selectEl ? selectEl.value : 'web',
+          hp: hpEl ? hpEl.value : '',
+          score: scoreEl ? scoreEl.value : ''
+        });
+      });
+
+      teamsGrid.innerHTML = '';
+      teams.forEach((team) => {
+        const hp = team.hp || {};
+        const scoreObj = team.score || {};
+        const total = scoreObj.total ?? 0;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const hpRows = ['web', 'api', 'file', 'db'].map((svc) => {
+          const val = hp[svc]?.current ?? 0;
+          const max = hp[svc]?.max ?? (svc === 'web' ? 40 : 30);
+          const pct = Math.max(0, Math.min(100, (val / max) * 100));
+          return `
+            <div class="hp-item">
+              <span>${svc.toUpperCase()}</span>
+              <div class="bar"><div class="fill" style="width:${pct}%;background:${hpColor(pct)}"></div></div>
+              <span>${val}/${max}</span>
+            </div>`;
+        }).join('');
+
+        card.innerHTML = `
+          <div class="row">
+            <span class="name" title="Rename" onclick="renameTeam('${team.ip}','${(team.name || '').replace(/'/g, "\\'")}')">${team.name}</span>
+            <span class="ip">${team.ip}</span>
+          </div>
+          <div class="ip">Team ID: ${team.team_id ?? '-'} | Proxy: ${team.proxy_port ?? '-'} | IDE: ${team.ide_port ?? '-'}</div>
+          <div class="score">${Number(total).toFixed(1)}</div>
+          <div class="hp-group">${hpRows}</div>
+          <button class="controls-toggle" type="button" onclick="toggleControls('${team.ip}')">Manual Controls</button>
+          <div id="ctrl-${team.ip}" class="controls ${openControls.has(team.ip) ? 'open' : ''}">
+            <div class="inline">
+              <select id="svc-${team.ip}">
+                <option value="web">web</option>
+                <option value="api">api</option>
+                <option value="file">file</option>
+                <option value="db">db</option>
+              </select>
+              <input id="hp-${team.ip}" type="number" />
+              <button class="small-btn" type="button" onclick="setHp('${team.ip}')">Set HP</button>
+            </div>
+            <div class="inline">
+              <input id="score-${team.ip}" type="number" step="0.1" />
+              <button class="small-btn" type="button" onclick="setScore('${team.ip}')">Set Score</button>
+            </div>
+            <div class="inline">
+              <button class="small-btn remove" type="button" onclick="removeTeam('${team.ip}')">Remove Team</button>
+            </div>
+          </div>
+        `;
+        teamsGrid.appendChild(card);
+      });
+
+      savedState.forEach((state, ip) => {
+        const ctrlEl = document.getElementById(`ctrl-${ip}`);
+        const selectEl = document.getElementById(`svc-${ip}`);
+        const hpEl = document.getElementById(`hp-${ip}`);
+        const scoreEl = document.getElementById(`score-${ip}`);
+
+        if (!ctrlEl || !selectEl || !hpEl || !scoreEl) return;
+
+        if (state.open) {
+          ctrlEl.classList.add('open');
+          openControls.add(ip);
+        }
+
+        if (state.service) selectEl.value = state.service;
+        if (state.hp !== '') hpEl.value = state.hp;
+        if (state.score !== '') scoreEl.value = state.score;
+      });
+
+      if (activeId) {
+        const activeAgain = document.getElementById(activeId);
+        if (activeAgain && typeof activeAgain.focus === 'function') {
+          activeAgain.focus();
+        }
+      }
+    }
+
+    function toggleControls(ip) {
+      const el = document.getElementById(`ctrl-${ip}`);
+      if (!el) return;
+      el.classList.toggle('open');
+      if (el.classList.contains('open')) {
+        openControls.add(ip);
+      } else {
+        openControls.delete(ip);
+      }
+    }
+
+    function renderEvents(events) {
+      eventsEl.innerHTML = '';
+      if (!events.length) {
+        eventsEl.innerHTML = '<div class="event">No events yet.</div>';
+        return;
+      }
+      events.slice(-20).reverse().forEach((e) => {
+        const line = document.createElement('div');
+        line.className = `event ${e.type || 'unknown'}`;
+        const t = e.timestamp ? new Date(e.timestamp * 1000).toLocaleTimeString() : '--:--:--';
+        line.textContent = `[${t}] ${e.type} | src=${e.source_team_ip || '-'} | tgt=${e.target_team_ip || '-'} | vuln=${e.vuln || '-'} | hp=${e.hp_delta ?? 0}`;
+        eventsEl.appendChild(line);
+      });
+    }
+
+    async function refreshTeamsAndEvents() {
+      try {
+        const teamsData = await fetchJson('/api/teams');
+        latestTeams = teamsData.teams || [];
+        renderTeams(latestTeams);
+      } catch (err) {
+        showToast(`Teams error: ${err.message}`, false);
+      }
+
+      try {
+        const ev = await fetchJson('/api/events');
+        renderEvents(ev.events || []);
+      } catch (err) {
+        showToast(`Events error: ${err.message}`, false);
+      }
+    }
+
+    function connectSSE() {
+      const es = new EventSource('/stream');
+      es.onmessage = (evt) => {
+        try {
+          const data = JSON.parse(evt.data);
+          const active = !!data.battle_started;
+          battleStatusEl.textContent = active ? 'Battle Active' : 'Idle';
+          battleStatusEl.className = `chip ${active ? 'active' : ''}`;
+          activeServiceEl.textContent = `Service: ${(data.active_service || 'web').toUpperCase()}`;
+          countdownEl.textContent = fmtMMSS(data.remaining_seconds || 0);
+
+          if (Array.isArray(data.teams)) {
+            const mapped = data.teams.map((t) => {
+              const found = latestTeams.find((x) => x.ip === t.ip) || {};
+              return {
+                ip: t.ip,
+                name: t.name,
+                hp: {
+                  web: { current: t.hp?.web ?? 0, max: 40 },
+                  api: { current: t.hp?.api ?? 0, max: 30 },
+                  file: { current: t.hp?.file ?? 0, max: 30 },
+                  db: { current: t.hp?.db ?? 0, max: 30 }
+                },
+                score: { total: t.score ?? 0, attacks: t.attacks ?? 0, defenses: t.defenses ?? 0 },
+                ...found
+              };
+            });
+            renderTeams(mapped);
+          }
+
+          if (Array.isArray(data.recent_events)) {
+            renderEvents(data.recent_events);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      es.onerror = () => {
+        es.close();
+        setTimeout(connectSSE, 2000);
+      };
+    }
+
+    document.getElementById('startBtn').addEventListener('click', startBattle);
+    document.getElementById('stopBtn').addEventListener('click', stopBattle);
+    document.getElementById('addTeamBtn').addEventListener('click', addOneTeam);
+    document.getElementById('dayStartBtn').addEventListener('click', hackathonDayStart);
+
+    window.renameTeam = renameTeam;
+    window.removeTeam = removeTeam;
+    window.setHp = setHp;
+    window.setScore = setScore;
+    window.toggleControls = toggleControls;
+
+    refreshTeamsAndEvents();
+    setInterval(refreshTeamsAndEvents, 3000);
+    connectSSE();
+  </script>
+</body>
+</html>
+---TOURNEY_ROOT---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyber Battle // Broadcast HUD</title>
+  <style>
+    :root {
+      --bg: #070a10;
+      --panel: rgba(12, 18, 30, 0.9);
+      --edge: #2a3e5a;
+      --text: #d9f6ff;
+      --muted: #7b95ad;
+      --cyan: #23e5ff;
+      --mint: #47ffc8;
+      --red: #ff5a7a;
+      --yellow: #ffd166;
+      --gold: #f6c451;
+      --silver: #cdd6e0;
+      --bronze: #cf8f57;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(35, 229, 255, 0.15), transparent 34%),
+        radial-gradient(circle at 92% 0%, rgba(71, 255, 200, 0.12), transparent 30%),
+        linear-gradient(180deg, #05070c 0%, #070a10 100%);
+      color: var(--text);
+      font-family: "Consolas", "Lucida Console", monospace;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.03),
+        rgba(255, 255, 255, 0.03) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      opacity: 0.26;
+      mix-blend-mode: screen;
+    }
+
+    .hud-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.12;
+      background-image:
+        linear-gradient(rgba(35, 229, 255, 0.24) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(35, 229, 255, 0.24) 1px, transparent 1px);
+      background-size: 38px 38px;
+    }
+
+    .page {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 112px 64px 1fr 64px;
+      gap: 10px;
+      padding: 10px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .top {
+      border: 1px solid var(--edge);
+      border-radius: 14px;
+      background: linear-gradient(130deg, rgba(11, 19, 32, 0.95), rgba(7, 13, 24, 0.95));
+      box-shadow: 0 0 24px rgba(35, 229, 255, 0.14), inset 0 0 20px rgba(71, 255, 200, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 10px;
+      border: 1px solid rgba(35, 229, 255, 0.5);
+      background: linear-gradient(160deg, rgba(6, 14, 24, 0.98), rgba(9, 22, 36, 0.98));
+      display: grid;
+      place-items: center;
+      box-shadow: inset 0 0 16px rgba(35, 229, 255, 0.2), 0 0 16px rgba(35, 229, 255, 0.1);
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 56px);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      text-shadow: 0 0 14px rgba(35, 229, 255, 0.6);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    .meta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border: 1px solid #31567d;
+      border-radius: 999px;
+      background: rgba(9, 23, 39, 0.85);
+      padding: 7px 11px;
+      font-size: 13px;
+      color: #cdeeff;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .timer {
+      border-color: rgba(255, 209, 102, 0.7);
+      color: var(--yellow);
+      background: rgba(50, 40, 11, 0.55);
+      font-weight: 700;
+    }
+
+    .service {
+      color: var(--mint);
+      border-color: rgba(71, 255, 200, 0.7);
+      text-shadow: 0 0 18px rgba(71, 255, 200, 0.8);
+      animation: glowPulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(71, 255, 200, 0.2); }
+      50% { box-shadow: 0 0 18px rgba(71, 255, 200, 0.58); }
+    }
+
+    .rotation {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .segment {
+      border: 1px solid #2b4564;
+      border-radius: 8px;
+      background: rgba(10, 17, 28, 0.9);
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #9ab9d6;
+      letter-spacing: 0.6px;
+    }
+
+    .segment.active {
+      border-color: rgba(35, 229, 255, 0.9);
+      color: #e1fbff;
+      background: linear-gradient(120deg, rgba(13, 37, 58, 0.95), rgba(11, 57, 74, 0.95));
+      box-shadow: 0 0 14px rgba(35, 229, 255, 0.45);
+    }
+
+    .scoreboard {
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-auto-rows: minmax(130px, 1fr);
+      gap: 10px;
+    }
+
+    .team {
+      border: 1px solid #2a405c;
+      border-radius: 11px;
+      background: linear-gradient(150deg, rgba(11, 18, 29, 0.96), rgba(8, 13, 22, 0.96));
+      padding: 10px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 6px;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .team:hover { transform: translateY(-2px); }
+
+    .rank {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0.8px;
+    }
+
+    .rank.gold {
+      color: var(--gold);
+      text-shadow: 0 0 16px rgba(246, 196, 81, 0.65);
+    }
+
+    .rank.silver { color: var(--silver); }
+    .rank.bronze { color: var(--bronze); }
+
+    .team-name {
+      font-size: 18px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .team-score {
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--cyan);
+      text-shadow: 0 0 18px rgba(35, 229, 255, 0.45);
+      transition: all 0.5s ease;
+    }
+
+    .mini-bars {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .mini {
+      font-size: 10px;
+      color: #98b4cb;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .mini .bar {
+      margin-top: 2px;
+      height: 8px;
+      border-radius: 999px;
+      border: 1px solid #2d4663;
+      background: #081018;
+      overflow: hidden;
+    }
+
+    .mini .fill {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .counts {
+      font-size: 11px;
+      color: #a2bdd5;
+      letter-spacing: 0.5px;
+    }
+
+    .ticker-wrap {
+      border: 1px solid #2a425e;
+      border-radius: 10px;
+      background: rgba(8, 15, 24, 0.93);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ticker {
+      position: absolute;
+      white-space: nowrap;
+      will-change: transform;
+      font-size: 13px;
+      line-height: 60px;
+      padding-left: 100%;
+      animation: ticker 28s linear infinite;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .evt-exploit_success { color: var(--red); }
+    .evt-block { color: var(--mint); }
+    .evt-patch { color: var(--cyan); }
+    .evt-heal { color: #82ffe4; }
+    .evt-exploit_attempt { color: #9fb5c8; }
+
+    @media (max-width: 1280px) {
+      .scoreboard { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 980px) {
+      .top { flex-direction: column; align-items: flex-start; }
+      .scoreboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="hud-grid"></div>
+  <div class="page">
+    <div class="top">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 18L32 6L56 18V46L32 58L8 46V18Z" stroke="#23e5ff" stroke-width="3"/>
+            <path d="M20 23H44V30H27V34H44V41H20V23Z" fill="#47ffc8"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="title">Cyber Battle</h1>
+          <div class="subtitle">Broadcast surveillance feed</div>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div id="timer" class="pill timer">00:00 / 30:00</div>
+        <div id="activeService" class="pill service">ACTIVE: WEB</div>
+      </div>
+    </div>
+
+    <div id="rotation" class="rotation"></div>
+
+    <div id="scoreboard" class="scoreboard"></div>
+
+    <div class="ticker-wrap">
+      <div id="ticker" class="ticker"></div>
+    </div>
+  </div>
+
+  <script>
+    const scoreboard = document.getElementById('scoreboard');
+    const timerEl = document.getElementById('timer');
+    const activeServiceEl = document.getElementById('activeService');
+    const rotationEl = document.getElementById('rotation');
+    const tickerEl = document.getElementById('ticker');
+
+    const SLOT_WINDOWS = [
+      ['WEB', '0:00-7:30'],
+      ['API', '7:30-15:00'],
+      ['FILE', '15:00-22:30'],
+      ['DB', '22:30-30:00']
+    ];
+
+    let lastScores = {};
+    let lastTeamsHash = '';
+    let lastActiveService = '';
+    let lastEventsHash = '';
+
+    function hpColor(pct) {
+      if (pct > 60) return '#47ffc8';
+      if (pct >= 30) return '#ffd166';
+      return '#ff5a7a';
+    }
+
+    function fmtMMSS(sec) {
+      const s = Math.max(0, Number(sec || 0));
+      const m = String(Math.floor(s / 60)).padStart(2, '0');
+      const r = String(s % 60).padStart(2, '0');
+      return `${m}:${r}`;
+    }
+
+    function rankClass(idx) {
+      if (idx === 0) return 'gold';
+      if (idx === 1) return 'silver';
+      if (idx === 2) return 'bronze';
+      return '';
+    }
+
+    function renderRotation(active) {
+      if (active === lastActiveService) return;
+      lastActiveService = active;
+      rotationEl.innerHTML = '';
+      SLOT_WINDOWS.forEach(([name, win]) => {
+        const div = document.createElement('div');
+        div.className = `segment ${active === name.toLowerCase() ? 'active' : ''}`;
+        div.innerHTML = `<strong>${name}</strong><span>${win}</span>`;
+        rotationEl.appendChild(div);
+      });
+    }
+
+    function animateScore(el, fromVal, toVal) {
+      const start = performance.now();
+      const duration = 550;
+      const step = (ts) => {
+        const p = Math.min(1, (ts - start) / duration);
+        const val = fromVal + (toVal - fromVal) * p;
+        el.textContent = val.toFixed(1);
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    function renderScoreboard(teams) {
+      const teamsKey = JSON.stringify((teams || []).map(t => ({ ip: t.ip, score: t.score, hp: t.hp, attacks: t.attacks, defenses: t.defenses, name: t.name })));
+      if (teamsKey === lastTeamsHash) return;
+      lastTeamsHash = teamsKey;
+      const sorted = [...teams].sort((a, b) => (b.score || 0) - (a.score || 0));
+      scoreboard.innerHTML = '';
+
+      sorted.slice(0, 10).forEach((t, idx) => {
+        const rank = idx + 1;
+        const hp = t.hp || {};
+        const score = Number(t.score || 0);
+
+        const card = document.createElement('div');
+        card.className = 'team';
+
+        const mini = ['web', 'api', 'file', 'db'].map((svc) => {
+          const max = svc === 'web' ? 40 : 30;
+          const value = Number(hp[svc] || 0);
+          const pct = Math.max(0, Math.min(100, (value / max) * 100));
+          return `
+            <div class="mini">
+              ${svc.toUpperCase()} ${value}
+              <div class="bar"><div class="fill" style="width:${pct}%;background:${hpColor(pct)}"></div></div>
+            </div>`;
+        }).join('');
+
+        card.innerHTML = `
+          <div class="rank ${rankClass(idx)}">#${rank}</div>
+          <div class="team-name">${t.name || t.ip}</div>
+          <div class="team-score" id="score-${t.ip}">${score.toFixed(1)}</div>
+          <div class="mini-bars">${mini}</div>
+          <div class="counts">ATK ${t.attacks || 0} | DEF ${t.defenses || 0}</div>
+        `;
+
+        scoreboard.appendChild(card);
+
+        const prev = Number(lastScores[t.ip] ?? score);
+        if (prev !== score) {
+          const el = card.querySelector(`#score-${CSS.escape(t.ip)}`) || card.querySelector('.team-score');
+          if (el) animateScore(el, prev, score);
+        }
+        lastScores[t.ip] = score;
+      });
+    }
+
+    function renderTicker(events) {
+      const eventsKey = JSON.stringify((events || []).slice(-15));
+      if (eventsKey === lastEventsHash) return;
+      lastEventsHash = eventsKey;
+
+      if (!events || !events.length) {
+        tickerEl.textContent = 'Awaiting network events...';
+        return;
+      }
+      const text = events.slice(-15).map((e) => {
+        const cls = `evt-${e.type || 'exploit_attempt'}`;
+        const ts = e.timestamp ? new Date(e.timestamp * 1000).toLocaleTimeString() : '--:--:--';
+        return `<span class="${cls}">[${ts}] ${e.type} src=${e.source_team_ip || '-'} tgt=${e.target_team_ip || '-'} vuln=${e.vuln || '-'} hp=${e.hp_delta ?? 0}</span>`;
+      }).join('  |  ');
+      tickerEl.innerHTML = text;
+    }
+
+    function connect() {
+      const es = new EventSource('/stream');
+      es.onmessage = (evt) => {
+        try {
+          const d = JSON.parse(evt.data);
+          timerEl.textContent = `${fmtMMSS(d.battle_elapsed)} / 30:00`;
+          activeServiceEl.textContent = `ACTIVE: ${(d.active_service || 'web').toUpperCase()}`;
+          renderRotation((d.active_service || 'web').toLowerCase());
+          renderScoreboard((d.teams || []).map((t) => ({
+            ip: t.ip,
+            name: t.name,
+            hp: t.hp,
+            score: t.score,
+            attacks: t.attacks,
+            defenses: t.defenses
+          })));
+          renderTicker(d.recent_events || []);
+        } catch (_) {}
+      };
+      es.onerror = () => {
+        es.close();
+        setTimeout(connect, 2000);
+      };
+    }
+
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+
+    connect();
+  </script>
+</body>
+</html>
+---NGINX_HEALTH---
+{"status":"ok"}
+---PROXY_CURRENT---
+{"active_service":"web","battle_elapsed":0,"battle_finished":false,"battle_remaining":0,"battle_started":false,"elapsed_seconds":0,"remaining_seconds":0,"slot":1,"teams_registered":0}
+---WEB_HEALTH---
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779384290,"vulns_active":[]}
+---API_HEALTH---
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779384290,"vulns_active":[]}
+---FILE_HEALTH---
+{"hp":30,"max_hp":30,"service":"file","status":"online","timestamp":1779384290,"vulns_active":[]}
+---DB_HEALTH---
+{"hp":30,"max_hp":30,"service":"db","status":"online","timestamp":1779384290,"vulns_active":[]}
+---WEB_ATTACK_STATUS---
+{"error":"The method is not allowed for the requested URL.","ok":false}
+405
+---API_ATTACK_STATUS---
+{"error":"The method is not allowed for the requested URL.","ok":false}
+405
+---FILE_ATTACK_STATUS---
+{"error":"The method is not allowed for the requested URL.","ok":false}
+405
+---DB_ATTACK_STATUS---
+{"error":"The method is not allowed for the requested URL.","ok":false}
+405
+---WEB_UI_HEAD---
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Web Service Tactical Console</title>
+
+    <style>
+
+        :root {
+
+            --bg: #05080f;
+
+            --panel: rgba(10, 17, 28, 0.94);
+
+            --line: #21344a;
+
+            --text: #d8f7ff;
+
+            --muted: #7ea2be;
+
+            --neon: #00e8c4;
+
+            --blue: #2f83ff;
+
+            --warn: #ffc857;
+
+            --bad: #ff5a7a;
+
+            --ok: #57fca7;
+
+        }
+
+
+        * { box-sizing: border-box; }
+
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            font-family: "Consolas", "Lucida Console", monospace;
+
+            color: var(--text);
+
+            background:
+
+                radial-gradient(circle at 12% 10%, rgba(47, 131, 255, 0.16), transparent 28%),
+
+                radial-gradient(circle at 88% 0%, rgba(0, 232, 196, 0.14), transparent 32%),
+
+                linear-gradient(180deg, #04070d 0%, #07101a 40%, #04070d 100%);
+
+            padding: 16px;
+
+        }
+
+
+        .scan {
+
+            position: fixed;
+
+            inset: 0;
+
+            pointer-events: none;
+
+            opacity: 0.18;
+
+            background: repeating-linear-gradient(
+
+                to bottom,
+
+                rgba(255,255,255,0.05),
+
+                rgba(255,255,255,0.05) 1px,
+
+                transparent 1px,
+
+                transparent 4px
+
+            );
+
+        }
+
+
+        .wrap { max-width: 1460px; margin: 0 auto; position: relative; z-index: 1; }
+
+
+        .head {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+
+            margin-bottom: 12px;
+
+            background: linear-gradient(140deg, rgba(12, 20, 33, 0.96), rgba(8, 14, 24, 0.96));
+
+            border: 1px solid var(--line);
+
+            border-radius: 12px;
+
+            padding: 12px;
+
+            box-shadow: 0 0 22px rgba(47,131,255,0.14), inset 0 0 16px rgba(0,232,196,0.08);
+
+        }
+
+
+        .title { font-size: clamp(20px, 2.4vw, 34px); letter-spacing: 1px; text-transform: uppercase; color: #cbf8ff; }
+
+        .title small { font-size: 0.5em; color: var(--neon); margin-left: 8px; }
+
+
+        .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .chip {
+
+            border: 1px solid #2b4762;
+
+            border-radius: 999px;
+
+            padding: 6px 10px;
+
+            font-size: 12px;
+
+            color: #cde9ff;
+
+            background: rgba(13, 24, 39, 0.92);
+
+        }
+
+        .chip.ok { border-color: rgba(87,252,167,0.65); color: #d6ffe6; }
+
+
+        .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+
+        .card {
+
+            background: var(--panel);
+
+            border: 1px solid var(--line);
+
+            border-radius: 12px;
+
+            padding: 12px;
+
+            box-shadow: inset 0 0 14px rgba(47,131,255,0.06);
+
+        }
+
+
+        h3 { margin: 0 0 8px; text-transform: uppercase; letter-spacing: 1px; color: #a8e7ff; }
+
+
+        label { display: block; font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+
+        input, select, button {
+
+            width: 100%;
+
+            margin-top: 6px;
+
+            margin-bottom: 8px;
+
+            padding: 7px 9px;
+
+            border-radius: 8px;
+
+            border: 1px solid #2c4561;
+
+            background: #07101a;
+
+            color: #e2f7ff;
+
+            font-family: inherit;
+
+        }
+
+
+        button {
+
+            cursor: pointer;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.7px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            background: linear-gradient(135deg, #1d4f91, #2f83ff);
+
+        }
+
+
+        .btn-danger { background: linear-gradient(135deg, #7e1d39, #d93a63); }
+
+        .btn-warn { background: linear-gradient(135deg, #7a5200, #d38a00); }
+
+        .btn-good { background: linear-gradient(135deg, #157b5c, #0fb38a); }
+
+
+        .double { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+
+        .vuln-list { display: grid; gap: 8px; margin-bottom: 8px; }
+
+        .vbtn {
+
+            text-align: left;
+
+            border: 1px solid #2f4863;
+
+            border-radius: 8px;
+
+            background: #081323;
+
+            color: #d7f6ff;
+
+            padding: 8px;
+
+            cursor: pointer;
+
+            font-family: inherit;
+
+        }
+
+        .vbtn.active {
+
+            border-color: rgba(0, 232, 196, 0.7);
+
+            background: rgba(0, 232, 196, 0.14);
+
+            color: #cffff1;
+
+            box-shadow: 0 0 12px rgba(0, 232, 196, 0.18);
+
+        }
+
+
+        .hint { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+
+
+        .console {
+
+            margin-top: 12px;
+
+            background: rgba(3, 8, 15, 0.96);
+
+            border: 1px solid #1d344b;
+
+            border-radius: 10px;
+
+            padding: 10px;
+
+            min-height: 180px;
+
+            white-space: pre-wrap;
+
+            color: #bfffe7;
+
+            font-size: 12px;
+
+            line-height: 1.35;
+
+            overflow: auto;
+
+        }
+
+
+        @media (max-width: 1100px) {
+
+            .grid { grid-template-columns: 1fr; }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="scan"></div>
+
+    <div class="wrap">
+
+    <div class="head">
+
+        <div class="title">Web Vulnerable Service <small>tactical panel</small></div>
+
+        <div class="chips">
+
+            <span class="chip">Hackathon Mode</span>
+
+            <span class="chip">Service: WEB</span>
+
+            <span id="healthChip" class="chip ok">Health: --</span>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid">
+
+        <div class="card">
+
+            <h3>Health and HP</h3>
+
+            <label>Shared Secret</label>
+
+            <input id="secret" placeholder="HACKATHON_SECRET" value="HACKATHON_SECRET_2025" />
+
+            <button class="btn-good" onclick="refreshHealth()">Get Health</button>
+
+            <label>Amount</label>
+
+            <input id="damageAmount" type="number" value="5" />
+
+            <div class="double">
+
+                <button class="btn-danger" onclick="callApi('POST','/damage',{secret:val('secret'),amount:num('damageAmo
+unt')})">Damage</button>
+
+                <button class="btn-good" onclick="callApi('POST','/heal',{secret:val('secret'),amount:num('damageAmount'
+)})">Heal</button>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Vulnerabilities</h3>
+
+            <div class="hint">Web service exposes 3 challenge vulns: sqli, xss, auth_bypass.</div>
+
+            <div class="vuln-list">
+
+                <button id="vbtn-sqli" class="vbtn active" onclick="setVuln('sqli')">sqli</button>
+
+                <button id="vbtn-xss" class="vbtn" onclick="setVuln('xss')">xss</button>
+
+                <button id="vbtn-auth_bypass" class="vbtn" onclick="setVuln('auth_bypass')">auth_bypass</button>
+
+            </div>
+
+            <div class="hint">Selected: <span id="selectedVulnLabel">sqli</span></div>
+
+            <div class="double">
+
+                <button class="btn-warn" onclick="callApi('POST','/flags/activate',{secret:val('secret'),vuln:selectedVu
+ln})">Activate</button>
+
+                <button class="btn-warn" onclick="callApi('POST','/flags/deactivate',{secret:val('secret'),vuln:selected
+Vuln})">Deactivate</button>
+
+            </div>
+
+            <div class="double">
+
+                <button onclick="callApi('POST','/defend',{vulnerability_type:selectedVuln,action:'disable'})">Defend Di
+sable</button>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>App Endpoints</h3>
+
+            <label>Username</label>
+
+            <input id="username" placeholder="username" value="admin" />
+
+            <label>Password</label>
+
+            <input id="password" placeholder="password" value="secret123" />
+
+            <button class="btn-good" onclick="login()">Login</button>
+
+            <label>Search</label>
+
+            <input id="search" placeholder="search term" value="a" />
+
+            <button onclick="callApi('GET','/search?q='+encodeURIComponent(val('search')))">Search Users</button>
+
+            <label>Comment</label>
+
+            <input id="comment" placeholder="comment" value="hello" />
+
+            <button onclick="callApi('POST','/comment',{comment:val('comment')})">Add Comment</button>
+
+            <button onclick="callApi('GET','/comments')">List Comments</button>
+
+            <label>Bearer Token</label>
+
+            <input id="token" placeholder="Bearer token" />
+
+            <button onclick="profile()">Profile</button>
+
+        </div>
+
+    </div>
+
+
+    <pre id="out" class="console">Ready.</pre>
+
+    </div>
+
+    <script>
+
+        const out = document.getElementById('out');
+
+        const healthChip = document.getElementById('healthChip');
+
+        const selectedVulnLabel = document.getElementById('selectedVulnLabel');
+
+        const val = (id) => document.getElementById(id).value;
+
+        const num = (id) => Number(document.getElementById(id).value || 0);
+
+        const apiBase = window.location.pathname.startsWith('/web/') ? '/web' : '';
+
+        let selectedVuln = 'sqli';
+
+
+        function writeLog(msg) {
+
+            const now = new Date().toLocaleTimeString();
+
+            out.textContent = `[${now}] ${msg}
+
+
+` + out.textContent;
+
+        }
+
+
+        function apiPath(path) {
+
+            if (!path || typeof path !== 'string') return path;
+
+            if (!path.startsWith('/')) return path;
+
+            return apiBase + path;
+
+        }
+
+
+        function setVuln(v) {
+
+            selectedVuln = v;
+
+            selectedVulnLabel.textContent = v;
+
+            ['sqli', 'xss', 'auth_bypass'].forEach((key) => {
+
+                const el = document.getElementById('vbtn-' + key);
+
+                if (el) el.classList.toggle('active', key === v);
+
+            });
+
+        }
+
+
+        async function callApi(method, path, body) {
+
+            const fullPath = apiPath(path);
+
+            const opts = { method, headers: {} };
+
+            if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body
+); }
+
+            try {
+
+                const r = await fetch(fullPath, opts);
+
+                const t = await r.text();
+
+                writeLog(method + ' ' + fullPath + '
+
+' + t);
+
+                return { ok: r.ok, text: t };
+
+            } catch (err) {
+
+                writeLog(method + ' ' + fullPath + '
+
+' + 'request error: ' + err.message);
+
+                return { ok: false, text: String(err.message) };
+
+            }
+
+        }
+
+
+        async function refreshHealth() {
+
+            const r = await fetch(apiPath('/health'));
+
+            const t = await r.text();
+
+            writeLog('GET /health
+
+' + t);
+
+            try {
+
+                const d = JSON.parse(t);
+
+                healthChip.textContent = `Health: ${d.status || '--'} | HP ${d.hp ?? '--'}/${d.max_hp ?? '--'}`;
+
+                healthChip.className = 'chip ' + ((d.status === 'online' || d.status === 'degraded') ? 'ok' : '');
+
+            } catch (_) {}
+
+        }
+
+
+        async function login() {
+
+            const res = await callApi('POST', '/login', { username: val('username'), password: val('password') });
+
+            try { const data = JSON.parse(res.text); if (data.token) document.getElementById('token').value = data.token
+; } catch (_) {}
+
+        }
+
+        async function profile() {
+
+            const token = val('token');
+
+            const r = await fetch(apiPath('/profile'), { headers: { Authorization: 'Bearer ' + token } });
+
+            writeLog('GET /profile
+
+' + await r.text());
+
+        }
+
+
+        refreshHealth();
+
+        setInterval(() => { refreshHealth().catch(() => {}); }, 5000);
+
+    </script>
+
+</body>
+
+</html>
+
+                
+
+---IDE_ROOT---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team 1 IDE</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #141b24;
+      --line: #2a3545;
+      --text: #e6edf3;
+      --muted: #91a4b8;
+      --green: #2ea043;
+      --red: #f85149;
+      --cyan: #2f81f7;
+      --amber: #d29922;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--text); font-family: Consolas, monospace; background: #0d1117; }
+    .layout { display: grid; grid-template-columns: 220px 1fr; grid-template-rows: 62px 1fr 220px; height: 100vh; }
+    .top { grid-column: 1 / span 2; background: var(--panel); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; gap: 8px; }
+    .left { border-right: 1px solid var(--line); background: #10161f; padding: 10px; overflow: auto; }
+    .main { position: relative; }
+    .bottom { grid-column: 1 / span 2; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; background: #0b1118; }
+    .title { font-weight: 700; }
+    .tabs { display: flex; gap: 6px; }
+    .tab { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; color: var(--muted); }
+    .tab.active { color: #fff; border-color: var(--cyan); background: #16263b; }
+    .actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .btn { border: none; border-radius: 8px; color: #fff; padding: 7px 10px; cursor: pointer; font-family: inherit; font-size: 12px; }
+    .run { background: var(--green); }
+    .stop { background: var(--red); }
+    .copy { background: var(--amber); color: #141414; }
+    .status-dot { width: 10px; height: 10px; border-radius: 999px; background: #6b7280; display: inline-block; }
+    .status-dot.running { background: var(--green); box-shadow: 0 0 8px rgba(46,160,67,0.7); }
+    .files-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .small-btn { background: var(--cyan); color: #fff; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-family: inherit; font-size: 11px; }
+    .file-list { display: grid; gap: 4px; }
+    .file-item { padding: 6px 8px; border: 1px solid #273241; border-radius: 6px; cursor: pointer; color: #c9d7e5; }
+    .file-item.active { border-color: var(--cyan); background: #14273f; }
+    .info { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; font-size: 12px; color: var(--muted); }
+    #editor { position: absolute; inset: 0; }
+    .log { border-right: 1px solid var(--line); display: grid; grid-template-rows: 30px 1fr; }
+    .log:last-child { border-right: none; }
+    .log-title { padding: 6px 8px; border-bottom: 1px solid var(--line); color: #9cc9ff; }
+    pre { margin: 0; padding: 8px; overflow: auto; font-size: 12px; white-space: pre-wrap; word-break: break-word; color: #85f7a1; }
+    pre .err { color: #ff9aa3; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+</head>
+<body>
+  <div class="layout">
+    <div class="top">
+      <div class="title">Team 1 // Team 1</div>
+      <div class="tabs">
+        <div id="tab-attacker" class="tab active">Attacker</div>
+        <div id="tab-defender" class="tab">Defender</div>
+      </div>
+      <div class="actions">
+        <select id="langSelect">
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="go">Go</option>
+          <option value="java">Java</option>
+          <option value="c">C</option>
+          <option value="shell">Bash</option>
+        </select>
+        <button class="btn run" id="runBtn">Run</button>
+        <button class="btn stop" id="stopBtn">Stop</button>
+        <button class="btn copy" id="copyCtxBtn">Copy context</button>
+        <span id="statusDot" class="status-dot"></span>
+      </div>
+    </div>
+
+    <div class="left">
+      <div class="files-head">
+        <strong>Workspace</strong>
+        <button class="small-btn" id="newFileBtn">New File</button>
+      </div>
+      <div id="fileList" class="file-list"></div>
+      <div class="info" id="contextPanel">Loading context...</div>
+    </div>
+
+    <div class="main"><div id="editor"></div></div>
+
+    <div class="bottom">
+      <div class="log">
+        <div class="log-title">Attacker logs</div>
+        <pre id="attackerLogs"></pre>
+      </div>
+      <div class="log">
+        <div class="log-title">Defender logs</div>
+        <pre id="defenderLogs"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let editor;
+    let model;
+    let files = [];
+    let currentFile = null;
+    let currentTab = 'attacker';
+    let lastLogSizes = { attacker: 0, defender: 0 };
+    let contextData = null;
+
+    const extToMonaco = {
+      py: 'python', js: 'javascript', go: 'go', java: 'java', c: 'c', cpp: 'cpp', sh: 'shell'
+    };
+    const langToExt = {
+      python: 'py', javascript: 'js', go: 'go', java: 'java', c: 'c', shell: 'sh'
+    };
+
+    const langComment = {
+      python: '#', javascript: '//', go: '//', java: '//', c: '//', cpp: '//', shell: '#'
+    };
+
+    function fileExt(name) {
+      const i = name.lastIndexOf('.');
+      return i >= 0 ? name.slice(i + 1).toLowerCase() : 'py';
+    }
+
+    function monacoLangForFile(name) {
+      return extToMonaco[fileExt(name)] || 'python';
+    }
+
+    async function api(url, opts = {}) {
+      const res = await fetch(url, opts);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    }
+
+    function renderFiles() {
+      const list = document.getElementById('fileList');
+      list.innerHTML = '';
+      files.forEach((f) => {
+        const div = document.createElement('div');
+        div.className = `file-item ${f === currentFile ? 'active' : ''}`;
+        div.textContent = f;
+        div.onclick = () => loadFile(f);
+        list.appendChild(div);
+      });
+    }
+
+    async function refreshFiles() {
+      const data = await api('/api/files');
+      files = data.files || [];
+      if (!currentFile && files.length) currentFile = files[0];
+      renderFiles();
+      if (currentFile) await loadFile(currentFile);
+    }
+
+    async function loadFile(name) {
+      const data = await api(`/api/files/${encodeURIComponent(name)}`);
+      currentFile = name;
+      model.setValue(data.content || '');
+      monaco.editor.setModelLanguage(model, monacoLangForFile(name));
+      const lang = monacoLangForFile(name);
+      const sel = document.getElementById('langSelect');
+      if ([...sel.options].some((o) => o.value === lang)) {
+        sel.value = lang;
+      }
+      renderFiles();
+    }
+
+    function targetFileFor(tab, lang) {
+      const ext = langToExt[lang] || 'py';
+      return `${tab}.${ext}`;
+    }
+
+    async function ensureActiveTabFile() {
+      const lang = document.getElementById('langSelect').value;
+      const target = targetFileFor(currentTab, lang);
+
+      if (!files.includes(target)) {
+        await api(`/api/files/${encodeURIComponent(target)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: '' })
+        });
+        files.push(target);
+        files.sort();
+      }
+
+      if (currentFile !== target) {
+        await loadFile(target);
+      } else {
+        renderFiles();
+      }
+    }
+
+    async function saveCurrentFile() {
+      if (!currentFile) return;
+      await api(`/api/files/${encodeURIComponent(currentFile)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: model.getValue() })
+      });
+    }
+
+    function setRunning(isRunning) {
+      const dot = document.getElementById('statusDot');
+      dot.className = `status-dot ${isRunning ? 'running' : ''}`;
+    }
+
+    async function runCurrent() {
+      if (!currentFile) return;
+      await saveCurrentFile();
+      await api(`/api/run/${currentTab}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: currentFile })
+      });
+      setRunning(true);
+    }
+
+    async function stopCurrent() {
+      await api(`/api/stop/${currentTab}`, { method: 'POST' });
+      setRunning(false);
+    }
+
+    async function newFile() {
+      const lang = document.getElementById('langSelect').value;
+      const name = prompt('New file name', targetFileFor(currentTab, lang));
+      if (!name) return;
+      await api(`/api/files/${encodeURIComponent(name)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: '' })
+      });
+      await refreshFiles();
+      await loadFile(name);
+    }
+
+    async function pollLogs(name) {
+      const data = await api(`/api/logs/${name}`);
+      const logEl = document.getElementById(`${name}Logs`);
+      const logs = data.logs || [];
+      const html = logs.map((line) => {
+        const escaped = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return /error|exception|traceback/i.test(line) ? `<span class=\"err\">${escaped}</span>` : escaped;
+      }).join('');
+      logEl.innerHTML = html;
+      logEl.scrollTop = logEl.scrollHeight;
+      if (name === currentTab) setRunning(!!data.running);
+    }
+
+    async function pollStatus() {
+      try {
+        await Promise.all([pollLogs('attacker'), pollLogs('defender')]);
+      } catch (_) {}
+    }
+
+    function contextBlockForLanguage(lang) {
+      if (!contextData) return '';
+      const c = langComment[lang] || '#';
+      const lines = [
+        `${c} TEAM_ID=${contextData.team_id}`,
+        `${c} TEAM_NAME=${contextData.team_name}`,
+        `${c} MY_PROXY=${contextData.my_proxy}`,
+        `${c} ORCH=${contextData.orchestrator}`,
+        `${c} ENEMY_TARGETS=${(contextData.enemy_targets || []).join(',')}`
+      ];
+      return lines.join('\n');
+    }
+
+    async function copyContext() {
+      const lang = document.getElementById('langSelect').value;
+      const block = contextBlockForLanguage(lang);
+      await navigator.clipboard.writeText(block);
+      alert('Context copied');
+    }
+
+    async function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-attacker').classList.toggle('active', tab === 'attacker');
+      document.getElementById('tab-defender').classList.toggle('active', tab === 'defender');
+      await ensureActiveTabFile();
+    }
+
+    async function loadContext() {
+      try {
+        contextData = await api('/api/context');
+        document.getElementById('contextPanel').innerHTML = [
+          `<div><strong>My proxy:</strong> ${contextData.my_proxy}</div>`,
+          `<div><strong>Orchestrator:</strong> ${contextData.orchestrator}</div>`,
+          `<div><strong>Enemy targets:</strong></div>`,
+          `<div>${(contextData.enemy_targets || []).join('<br>') || 'none'}</div>`
+        ].join('');
+      } catch (err) {
+        document.getElementById('contextPanel').textContent = `Context error: ${err.message}`;
+      }
+    }
+
+    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+    require(['vs/editor/editor.main'], async function () {
+      model = monaco.editor.createModel('', 'python');
+      editor = monaco.editor.create(document.getElementById('editor'), {
+        model,
+        theme: 'vs-dark',
+        automaticLayout: true,
+        minimap: { enabled: true },
+        fontSize: 14
+      });
+
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, async () => {
+        await saveCurrentFile();
+      });
+
+      await refreshFiles();
+      await ensureActiveTabFile();
+      await loadContext();
+      await pollStatus();
+
+      setInterval(pollStatus, 2000);
+      setInterval(async () => { try { await saveCurrentFile(); } catch (_) {} }, 10000);
+    });
+
+    document.getElementById('runBtn').onclick = runCurrent;
+    document.getElementById('stopBtn').onclick = stopCurrent;
+    document.getElementById('newFileBtn').onclick = newFile;
+    document.getElementById('copyCtxBtn').onclick = copyContext;
+    document.getElementById('langSelect').onchange = () => ensureActiveTabFile();
+    document.getElementById('tab-attacker').onclick = () => switchTab('attacker');
+    document.getElementById('tab-defender').onclick = () => switchTab('defender');
+  </script>
+</body>
+</html>
+---IDE_API_LIST---
+<!doctype html>
+<html lang=en>
+<title>404 Not Found</title>
+<h1>Not Found</h1>
+<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>
+---DONE---

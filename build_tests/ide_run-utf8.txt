@@ -1,0 +1,17 @@
+﻿---FILES---
+{"files":["attacker","attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}
+---CONTEXT---
+{"active_service_url":"http://orchestrator:9000/current","all_teams":[],"enemy_targets":[],"enemy_targets_external":[],"events_url":"http://orchestrator:9000/events","my_proxy":"http://192.168.1.100:9100","my_proxy_internal":"http://team1-proxy","orchestrator":"http://orchestrator:9000","server_ip":"192.168.1.100","team_id":"1","team_name":"Team 1"}
+---RUN_ATTACKER---
+{"bot":"attacker","filename":"attacker.py","ok":true,"pid":14}
+---LOG_ATTACKER---
+{"logs":["[attacker.py] started\n","attack web/sql_injection -> 410 {\"error\":\"attack shortcut disabled\",\"message\":\"Use the vulnerable web endpoints directly instead of /attack.\",\"ok\":false\n"],"running":true}
+---STOP_ATTACKER---
+{"bot":"attacker","ok":true,"was_running":true}
+---RUN_DEFENDER---
+{"bot":"defender","filename":"defender.py","ok":true,"pid":19}
+---LOG_DEFENDER---
+{"logs":["[defender.py] started\n","defend file/csrf/enable -> 200 {\"active\":true,\"ok\":true,\"vuln\":\"path_traversal\"}\n","\n"],"running":true}
+---STOP_DEFENDER---
+{"bot":"defender","ok":true,"was_running":true}
+---DONE---

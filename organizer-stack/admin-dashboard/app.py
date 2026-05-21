@@ -272,6 +272,9 @@ def register_test_teams(count=10, ip_prefix="192.168.1.", ip_start=101, team_pre
         payload = {
             "team_name": f"{team_prefix} {team_no}",
             "ip": ip,
+            "team_id": team_no,
+            "proxy_port": 9100 + (team_no - 1),
+            "ide_port": 8100 + (team_no - 1),
         }
         try:
             if runtime_error:

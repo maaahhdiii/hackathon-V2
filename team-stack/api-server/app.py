@@ -147,7 +147,6 @@ def service_ui():
             </select>
             <button onclick="callApi('POST','/flags/activate',{secret:val('secret'),vuln:val('vuln')})">Activate</button>
             <button onclick="callApi('POST','/flags/deactivate',{secret:val('secret'),vuln:val('vuln')})">Deactivate</button>
-            <button onclick="callApi('POST','/attack',{vulnerability_type:val('vuln'),amount:8})">Attack</button>
             <button onclick="callApi('POST','/defend',{vulnerability_type:val('vuln'),action:'disable'})">Defend Disable</button>
         </div>
         <div class="card">
@@ -242,18 +241,13 @@ def heal():
 
 @app.post("/attack")
 def attack():
-    payload = request.get_json(silent=True) or {}
-    vuln = normalize_vuln(payload.get("vulnerability_type") or payload.get("vuln"))
-    amount = int(payload.get("amount", 8))
-
-    with state_lock:
-        is_active = vulnerabilities.get(vuln, False)
-
-    if not is_active:
-        return jsonify({"ok": True, "success": False, "reason": "vulnerability not active", "vuln": vuln, "hp": current_hp})
-
-    hp_value = apply_damage(amount)
-    return jsonify({"ok": True, "success": True, "vuln": vuln, "hp": hp_value})
+    return jsonify(
+        {
+            "ok": False,
+            "error": "attack shortcut disabled",
+            "message": "Use the vulnerable API endpoints directly instead of /attack.",
+        }
+    ), 410
 
 
 @app.post("/defend")

@@ -1,0 +1,1 @@
+﻿{"type":"exploit_success","source_team_ip":"team1-proxy","target_team_ip":"team2-proxy","target_service":"web","vuln":"sqli","hp_delta":-8}

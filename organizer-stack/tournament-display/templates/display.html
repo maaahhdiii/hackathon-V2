@@ -360,6 +360,9 @@
     ];
 
     let lastScores = {};
+    let lastTeamsHash = '';
+    let lastActiveService = '';
+    let lastEventsHash = '';
 
     function hpColor(pct) {
       if (pct > 60) return '#47ffc8';
@@ -382,6 +385,8 @@
     }
 
     function renderRotation(active) {
+      if (active === lastActiveService) return;
+      lastActiveService = active;
       rotationEl.innerHTML = '';
       SLOT_WINDOWS.forEach(([name, win]) => {
         const div = document.createElement('div');
@@ -404,6 +409,9 @@
     }
 
     function renderScoreboard(teams) {
+      const teamsKey = JSON.stringify((teams || []).map(t => ({ ip: t.ip, score: t.score, hp: t.hp, attacks: t.attacks, defenses: t.defenses, name: t.name })));
+      if (teamsKey === lastTeamsHash) return;
+      lastTeamsHash = teamsKey;
       const sorted = [...teams].sort((a, b) => (b.score || 0) - (a.score || 0));
       scoreboard.innerHTML = '';
 
@@ -446,6 +454,10 @@
     }
 
     function renderTicker(events) {
+      const eventsKey = JSON.stringify((events || []).slice(-15));
+      if (eventsKey === lastEventsHash) return;
+      lastEventsHash = eventsKey;
+
       if (!events || !events.length) {
         tickerEl.textContent = 'Awaiting network events...';
         return;

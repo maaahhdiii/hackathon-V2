@@ -456,15 +456,15 @@
       </div>
 
       <div class="action-row">
-        <button class="btn btn-start" id="startBtn">Start Battle</button>
-        <button class="btn btn-stop" id="stopBtn">Stop Battle</button>
-        <button class="btn btn-day" id="dayStartBtn">Hackathon Day Start</button>
+        <button class="btn btn-start" id="startBtn" type="button">Start Battle</button>
+        <button class="btn btn-stop" id="stopBtn" type="button">Stop Battle</button>
+        <button class="btn btn-day" id="dayStartBtn" type="button">Hackathon Day Start</button>
       </div>
 
       <div class="team-add">
         <input id="teamNoInput" type="number" min="1" max="10" placeholder="Team number (1-10)" />
         <input id="teamNameInput" type="text" placeholder="Team name (optional)" />
-        <button class="btn btn-add" id="addTeamBtn">Add Team</button>
+        <button class="btn btn-add" id="addTeamBtn" type="button">Add Team</button>
       </div>
     </div>
 
@@ -647,6 +647,24 @@
     }
 
     function renderTeams(teams) {
+      const activeElement = document.activeElement;
+      const activeId = activeElement && activeElement.id ? activeElement.id : '';
+      const savedState = new Map();
+
+      teams.forEach((team) => {
+        const selectEl = document.getElementById(`svc-${team.ip}`);
+        const hpEl = document.getElementById(`hp-${team.ip}`);
+        const scoreEl = document.getElementById(`score-${team.ip}`);
+        const ctrlEl = document.getElementById(`ctrl-${team.ip}`);
+
+        savedState.set(team.ip, {
+          open: openControls.has(team.ip) || (ctrlEl && ctrlEl.classList.contains('open')),
+          service: selectEl ? selectEl.value : 'web',
+          hp: hpEl ? hpEl.value : '',
+          score: scoreEl ? scoreEl.value : ''
+        });
+      });
+
       teamsGrid.innerHTML = '';
       teams.forEach((team) => {
         const hp = team.hp || {};
@@ -676,7 +694,7 @@
           <div class="ip">Team ID: ${team.team_id ?? '-'} | Proxy: ${team.proxy_port ?? '-'} | IDE: ${team.ide_port ?? '-'}</div>
           <div class="score">${Number(total).toFixed(1)}</div>
           <div class="hp-group">${hpRows}</div>
-          <button class="controls-toggle" onclick="toggleControls('${team.ip}')">Manual Controls</button>
+          <button class="controls-toggle" type="button" onclick="toggleControls('${team.ip}')">Manual Controls</button>
           <div id="ctrl-${team.ip}" class="controls ${openControls.has(team.ip) ? 'open' : ''}">
             <div class="inline">
               <select id="svc-${team.ip}">
@@ -686,19 +704,44 @@
                 <option value="db">db</option>
               </select>
               <input id="hp-${team.ip}" type="number" />
-              <button class="small-btn" onclick="setHp('${team.ip}')">Set HP</button>
+              <button class="small-btn" type="button" onclick="setHp('${team.ip}')">Set HP</button>
             </div>
             <div class="inline">
               <input id="score-${team.ip}" type="number" step="0.1" />
-              <button class="small-btn" onclick="setScore('${team.ip}')">Set Score</button>
+              <button class="small-btn" type="button" onclick="setScore('${team.ip}')">Set Score</button>
             </div>
             <div class="inline">
-              <button class="small-btn remove" onclick="removeTeam('${team.ip}')">Remove Team</button>
+              <button class="small-btn remove" type="button" onclick="removeTeam('${team.ip}')">Remove Team</button>
             </div>
           </div>
         `;
         teamsGrid.appendChild(card);
       });
+
+      savedState.forEach((state, ip) => {
+        const ctrlEl = document.getElementById(`ctrl-${ip}`);
+        const selectEl = document.getElementById(`svc-${ip}`);
+        const hpEl = document.getElementById(`hp-${ip}`);
+        const scoreEl = document.getElementById(`score-${ip}`);
+
+        if (!ctrlEl || !selectEl || !hpEl || !scoreEl) return;
+
+        if (state.open) {
+          ctrlEl.classList.add('open');
+          openControls.add(ip);
+        }
+
+        if (state.service) selectEl.value = state.service;
+        if (state.hp !== '') hpEl.value = state.hp;
+        if (state.score !== '') scoreEl.value = state.score;
+      });
+
+      if (activeId) {
+        const activeAgain = document.getElementById(activeId);
+        if (activeAgain && typeof activeAgain.focus === 'function') {
+          activeAgain.focus();
+        }
+      }
     }
 
     function toggleControls(ip) {

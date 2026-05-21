@@ -2,32 +2,42 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.util.Random;
 
 public class defender {
-    public static void main(String[] args) throws Exception {
-        String target = System.getenv().getOrDefault("MY_TARGET", "http://localhost:9100");
-        String[] vulns = {"sql_injection", "xss", "csrf", "rce", "auth_bypass"};
-        String[] services = {"web", "api", "file", "db"};
-        Random rnd = new Random();
+    private static String target = System.getenv().getOrDefault("MY_TARGET", "http://localhost:9100");
+    private static String secret = System.getenv().getOrDefault("HACKATHON_SECRET", "HACKATHON_SECRET_2025");
+    private static final String[][] SERVICE_VULNS = {
+        {"web", "sqli", "xss", "auth_bypass"},
+        {"api", "insecure_ep", "cmd_inject", "idor"},
+        {"file", "path_traversal", "exec_upload"},
+        {"db", "sqli", "priv_esc"}
+    };
 
+    private static int postJson(String path, String body) throws Exception {
+        URL url = URI.create(target + path).toURL();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(body.getBytes());
+        }
+        return conn.getResponseCode();
+    }
+
+    public static void main(String[] args) throws Exception {
         System.out.println("[defender.java] started");
         while (true) {
-            String vuln = vulns[rnd.nextInt(vulns.length)];
-            String service = services[rnd.nextInt(services.length)];
-            String action = rnd.nextBoolean() ? "enable" : "disable";
-            String body = String.format("{\"service\":\"%s\",\"vulnerability_type\":\"%s\",\"action\":\"%s\"}", service, vuln, action);
-
             try {
-                URL url = URI.create(target + "/" + service + "/defend").toURL();
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setDoOutput(true);
-                try (OutputStream os = conn.getOutputStream()) {
-                    os.write(body.getBytes());
+                for (String[] entry : SERVICE_VULNS) {
+                    String service = entry[0];
+                    for (int i = 1; i < entry.length; i++) {
+                        int code = postJson("/" + service + "/flags/deactivate", String.format("{\"secret\":\"%s\",\"vuln\":\"%s\"}", secret, entry[i]));
+                        System.out.println("deactivate " + service + "/" + entry[i] + " -> " + code);
+                    }
+                    int healCode = postJson("/" + service + "/heal", String.format("{\"secret\":\"%s\",\"amount\":5}", secret));
+                    System.out.println("heal " + service + " -> " + healCode);
                 }
-                System.out.println("defend " + service + "/" + vuln + "/" + action + " -> " + conn.getResponseCode());
             } catch (Exception e) {
                 System.out.println("defend error: " + e.getMessage());
             }

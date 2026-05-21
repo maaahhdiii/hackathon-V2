@@ -69,59 +69,77 @@ if %errorlevel% neq 0 (
 
 pushd "%STACK_DIR%" || exit /b 1
 
-set "SERVICE_LIST=orchestrator admin-dashboard tournament-display"
+set "ORGANIZER_SERVICES=orchestrator admin-dashboard tournament-display"
+set "BUILD_SERVICES=orchestrator admin-dashboard tournament-display"
 for /L %%I in (1,1,10) do (
-  set "SERVICE_LIST=!SERVICE_LIST! team%%I-web team%%I-api team%%I-file team%%I-db team%%I-proxy team%%I-ide"
+  set "BUILD_SERVICES=!BUILD_SERVICES! team%%I-web team%%I-api team%%I-file team%%I-db team%%I-proxy team%%I-ide"
 )
 
 set "TEAM_COUNT=%TEAM_COUNT%"
 
 if "%PULL_UPDATES%"=="1" (
   echo Checking Docker registry for image updates...
-  call %COMPOSE_CMD% pull !SERVICE_LIST!
+  call %COMPOSE_CMD% pull !BUILD_SERVICES!
 )
 
 echo Starting platform from "%STACK_DIR%" with %TEAM_COUNT% team(s)...
 set "RC=1"
 if "%FORCE_BUILD%"=="1" (
   echo Build mode: enabled (forcing image rebuild)
-  for /L %%A in (1,1,3) do (
-    echo Startup attempt %%A/3...
-    call %COMPOSE_CMD% up -d --build !SERVICE_LIST!
-    set "RC=!ERRORLEVEL!"
-    if "!RC!"=="0" goto :startup_done
-
-    echo [WARN] docker compose up failed on attempt %%A with code !RC!.
-    docker info >nul 2>&1
-    if !errorlevel! neq 0 (
-      echo [WARN] Docker engine is temporarily unavailable.
-    )
-
-    if %%A LSS 3 (
-      echo [WARN] Retrying in 3 seconds...
-      timeout /t 3 /nobreak >nul
-    )
-  )
+  echo Startup step 1/3: building images for all services...
+  call %COMPOSE_CMD% build !BUILD_SERVICES!
+  set "RC=!ERRORLEVEL!"
+  if not "!RC!"=="0" goto :startup_failed
+  echo Startup step 2/3: bringing organizer services up...
+  call %COMPOSE_CMD% up -d --remove-orphans !ORGANIZER_SERVICES!
+  set "RC=!ERRORLEVEL!"
 ) else (
   echo Build mode: stable reuse, no recreate unless missing
-  echo Startup step 1/2: create only missing containers...
-  call %COMPOSE_CMD% create --no-recreate --no-build !SERVICE_LIST!
-  set "RC=!ERRORLEVEL!"
-  if not "!RC!"=="0" goto :startup_done
-
-  echo Startup step 2/2: start existing containers...
-  call %COMPOSE_CMD% start !SERVICE_LIST!
+  echo Startup step 1/3: building images for all services...
+  call %COMPOSE_CMD% build !BUILD_SERVICES!
   set "RC=!ERRORLEVEL!"
 )
 
-:startup_done
+if not "!RC!"=="0" goto :startup_failed
 
-if not "%RC%"=="0" (
+if "%FORCE_BUILD%"=="0" (
+  echo Startup step 2/3: bringing organizer services up...
+  call %COMPOSE_CMD% up -d --remove-orphans !ORGANIZER_SERVICES!
+  set "RC=!ERRORLEVEL!"
+  if not "!RC!"=="0" goto :startup_failed
+)
+
+echo Startup step 3/3: verifying organizer services...
+call %COMPOSE_CMD% ps
+set "RC=!ERRORLEVEL!"
+if not "!RC!"=="0" goto :startup_failed
+
+goto :startup_ready
+
+:startup_failed
+echo [WARN] Initial compose startup failed with code %RC%.
+echo [WARN] Retrying from a clean compose state...
+call %COMPOSE_CMD% down --remove-orphans
+echo [WARN] Rebuilding images for all services...
+call %COMPOSE_CMD% build !BUILD_SERVICES!
+set "RC=!ERRORLEVEL!"
+if not "!RC!"=="0" goto :startup_error
+call %COMPOSE_CMD% up -d --remove-orphans !ORGANIZER_SERVICES!
+set "RC=!ERRORLEVEL!"
+if not "!RC!"=="0" goto :startup_error
+echo Startup step 3/3: verifying organizer services...
+call %COMPOSE_CMD% ps
+set "RC=!ERRORLEVEL!"
+if not "!RC!"=="0" goto :startup_error
+goto :startup_ready
+
+:startup_error
   echo.
   echo [ERROR] Failed to start platform. Exit code: %RC%
   popd
   exit /b %RC%
-)
+
+:startup_ready
 
 echo.
 echo Waiting for orchestrator API to become ready...

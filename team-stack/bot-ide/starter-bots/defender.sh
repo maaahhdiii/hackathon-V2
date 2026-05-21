@@ -1,16 +1,29 @@
+done
 #!/usr/bin/env bash
 set -u
 
 MY_TARGET="${MY_TARGET:-http://localhost:9100}"
+SECRET="${HACKATHON_SECRET:-HACKATHON_SECRET_2025}"
 
 echo "[defender.sh] started"
 while true; do
-  vuln=$(printf '%s\n' sql_injection xss csrf rce auth_bypass | shuf -n1)
-  service=$(printf '%s\n' web api file db | shuf -n1)
-  action=$(printf '%s\n' enable disable | shuf -n1)
-  curl -s -X POST "$MY_TARGET/$service/defend" \
-    -H 'Content-Type: application/json' \
-    -d "{\"service\":\"$service\",\"vulnerability_type\":\"$vuln\",\"action\":\"$action\"}" >/dev/null
-  echo "defend $service/$vuln/$action"
+  for service in web api file db; do
+    case "$service" in
+      web) vulns="sqli xss auth_bypass" ;;
+      api) vulns="insecure_ep cmd_inject idor" ;;
+      file) vulns="path_traversal exec_upload" ;;
+      db) vulns="sqli priv_esc" ;;
+    esac
+    for vuln in $vulns; do
+      curl -s -X POST "$MY_TARGET/$service/flags/deactivate" \
+        -H 'Content-Type: application/json' \
+        -d "{\"secret\":\"$SECRET\",\"vuln\":\"$vuln\"}" >/dev/null
+      echo "deactivate $service/$vuln"
+    done
+    curl -s -X POST "$MY_TARGET/$service/heal" \
+      -H 'Content-Type: application/json' \
+      -d "{\"secret\":\"$SECRET\",\"amount\":5}" >/dev/null
+    echo "heal $service"
+  done
   sleep 4
 done

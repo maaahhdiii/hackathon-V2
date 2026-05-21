@@ -1,0 +1,131 @@
+﻿Run at 05/21/2026 20:21:25
+
+=== Team 1 ===
+{"status":"ok"}
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779391284,"vulns_active":[]}
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779391284,"vulns_active":[]}
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.31.0</center>
+</body>
+</html>
+{"files":["attacker","attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}
+
+=== Team 2 ===
+{"status":"ok"}
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779391285,"vulns_active":[]}
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779391285,"vulns_active":[]}
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.31.0</center>
+</body>
+</html>
+{"files":["attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}
+
+=== Team 3 ===
+{"status":"ok"}
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779391285,"vulns_active":[]}
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779391285,"vulns_active":[]}
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.31.0</center>
+</body>
+</html>
+{"files":["attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}
+
+=== Team 4 ===
+{"status":"ok"}
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779391285,"vulns_active":[]}
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779391285,"vulns_active":[]}
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.31.0</center>
+</body>
+</html>
+{"files":["attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}
+
+=== Team 5 ===
+{"status":"ok"}
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779391285,"vulns_active":[]}
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779391285,"vulns_active":[]}
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.31.0</center>
+</body>
+</html>
+{"files":["attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}
+
+=== Team 6 ===
+{"status":"ok"}
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779391285,"vulns_active":[]}
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779391285,"vulns_active":[]}
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.31.0</center>
+</body>
+</html>
+{"files":["attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}
+
+=== Team 7 ===
+{"status":"ok"}
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779391286,"vulns_active":[]}
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779391286,"vulns_active":[]}
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.31.0</center>
+</body>
+</html>
+{"files":["attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}
+
+=== Team 8 ===
+{"status":"ok"}
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779391286,"vulns_active":[]}
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779391286,"vulns_active":[]}
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.31.0</center>
+</body>
+</html>
+{"files":["attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}
+
+=== Team 9 ===
+{"status":"ok"}
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779391286,"vulns_active":[]}
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779391286,"vulns_active":[]}
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.31.0</center>
+</body>
+</html>
+{"files":["attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}
+
+=== Team 10 ===
+{"status":"ok"}
+{"hp":40,"max_hp":40,"service":"web","status":"online","timestamp":1779391286,"vulns_active":[]}
+{"hp":30,"max_hp":30,"service":"api","status":"online","timestamp":1779391286,"vulns_active":[]}
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.31.0</center>
+</body>
+</html>
+{"files":["attacker.c","attacker.go","attacker.java","attacker.js","attacker.py","attacker.sh","defender.c","defender.go","defender.java","defender.js","defender.py","defender.sh"]}

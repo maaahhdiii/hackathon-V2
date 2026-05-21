@@ -316,6 +316,22 @@ def register():
         except (TypeError, ValueError):
             return jsonify({"ok": False, "error": "ide_port must be an integer"}), 400
 
+    if team_id is None and ip:
+        match = re.match(r"team(\d+)-proxy$", ip)
+        if match:
+            team_id = int(match.group(1))
+
+    if team_id is None and team_name:
+        match = re.search(r"(\d+)", team_name)
+        if match:
+            team_id = int(match.group(1))
+
+    if proxy_port is None and isinstance(team_id, int) and team_id >= 1:
+        proxy_port = 9100 + (team_id - 1)
+
+    if ide_port is None and isinstance(team_id, int) and team_id >= 1:
+        ide_port = 8100 + (team_id - 1)
+
     with state_lock:
         teams[ip] = {
             "name": team_name,

