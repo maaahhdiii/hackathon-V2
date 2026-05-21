@@ -1,10 +1,7 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
+#include <stdio.h>
 
-int main(void) {
-    const char *target = getenv("MY_TARGET");
+int main(void) { return 0; }
     const char *secret = getenv("HACKATHON_SECRET");
     if (!target) target = "http://localhost:9100";
     if (!secret) secret = "HACKATHON_SECRET_2025";

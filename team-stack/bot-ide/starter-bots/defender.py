@@ -1,11 +1,13 @@
-import os
-import time
+"""
+Empty starter defender bot — intentionally does nothing.
+"""
 
-import requests
+def main():
+    return 0
 
-MY_TARGET = os.getenv("MY_TARGET", "http://localhost:9100")
-HACKATHON_SECRET = os.getenv("HACKATHON_SECRET", "HACKATHON_SECRET_2025")
-SERVICE_VULNS = {
+
+if __name__ == "__main__":
+    raise SystemExit(main())
     "web": ["sqli", "xss", "auth_bypass"],
     "api": ["insecure_ep", "cmd_inject", "idor"],
     "file": ["path_traversal", "exec_upload"],
