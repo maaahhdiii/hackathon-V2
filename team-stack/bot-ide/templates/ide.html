@@ -200,12 +200,16 @@
       });
     }
 
+    
+
     function setRunning(isRunning) {
       const dot = document.getElementById('statusDot');
       dot.className = `status-dot ${isRunning ? 'running' : ''}`;
     }
 
     async function runCurrent() {
+      // Ensure the file matching the active tab and language exists and is loaded
+      await ensureActiveTabFile();
       if (!currentFile) return;
       await saveCurrentFile();
       await api(`/api/run/${currentTab}`, {
@@ -261,7 +265,9 @@
         `${c} TEAM_NAME=${contextData.team_name}`,
         `${c} MY_PROXY=${contextData.my_proxy}`,
         `${c} ORCH=${contextData.orchestrator}`,
-        `${c} ENEMY_TARGETS=${(contextData.enemy_targets || []).join(',')}`
+        `${c} DISCOVERY_HOST=${contextData.discovery_host}`,
+        `${c} DISCOVERY_PORT_MIN=${contextData.discovery_port_min}`,
+        `${c} DISCOVERY_PORT_MAX=${contextData.discovery_port_max}`
       ];
       return lines.join('\n');
     }
@@ -286,8 +292,9 @@
         document.getElementById('contextPanel').innerHTML = [
           `<div><strong>My proxy:</strong> ${contextData.my_proxy}</div>`,
           `<div><strong>Orchestrator:</strong> ${contextData.orchestrator}</div>`,
-          `<div><strong>Enemy targets:</strong></div>`,
-          `<div>${(contextData.enemy_targets || []).join('<br>') || 'none'}</div>`
+          `<div><strong>Discovery host:</strong> ${contextData.discovery_host}</div>`,
+          `<div><strong>Discovery port range:</strong> ${contextData.discovery_port_min} - ${contextData.discovery_port_max}</div>`,
+          `<div><strong>Note:</strong> no opponent list is provided; participants must build their own discovery logic.</div>`
         ].join('');
       } catch (err) {
         document.getElementById('contextPanel').textContent = `Context error: ${err.message}`;

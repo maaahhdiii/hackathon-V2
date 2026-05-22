@@ -1,6 +1,9 @@
 """
-Empty starter attacker bot — intentionally does nothing.
+Starter attacker bot.
+
+Implement your own discovery and attack logic here.
 """
+
 
 def main():
     return 0

@@ -172,9 +172,7 @@ set /A TEAM_IDX=1
 
 :register_next_team
 if !TEAM_IDX! GTR %TEAM_COUNT% goto :register_done
-set /A PROXY_PORT=9099+!TEAM_IDX!
-set /A IDE_PORT=8099+!TEAM_IDX!
-curl -s -f -X POST "http://localhost:9000/register" -H "Content-Type: application/json" -d "{\"team_name\":\"Team !TEAM_IDX!\",\"ip\":\"team!TEAM_IDX!-proxy\",\"team_id\":!TEAM_IDX!,\"proxy_port\":!PROXY_PORT!,\"ide_port\":!IDE_PORT!}" >nul 2>&1
+curl -s -f -X POST "http://localhost:9000/register" -H "Content-Type: application/json" -d "{\"team_name\":\"Team !TEAM_IDX!\",\"ip\":\"team!TEAM_IDX!-proxy\",\"team_id\":!TEAM_IDX!}" >nul 2>&1
 if !errorlevel! EQU 0 (
   set /A REGISTERED+=1
 ) else (

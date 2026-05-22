@@ -1,8 +1,10 @@
 import json
 import logging
 import os
+import random
 import threading
 import time
+import re
 from collections import defaultdict
 from typing import Any, Dict, List
 
@@ -22,6 +24,10 @@ SECRET = os.getenv("HACKATHON_SECRET", "HACKATHON_SECRET_2025")
 SLOTS = ["web", "api", "file", "db"]
 SLOT_DURATION = int(os.getenv("SLOT_DURATION", "450"))
 MAX_HP = {"web": 40, "api": 30, "file": 30, "db": 30}
+PROXY_PORT_MIN = int(os.getenv("TEAM_PROXY_PORT_MIN", "12000"))
+PROXY_PORT_MAX = int(os.getenv("TEAM_PROXY_PORT_MAX", "12999"))
+IDE_PORT_MIN = int(os.getenv("TEAM_IDE_PORT_MIN", "13000"))
+IDE_PORT_MAX = int(os.getenv("TEAM_IDE_PORT_MAX", "13999"))
 VULNS = {
     "web": ["sqli", "xss", "auth_bypass"],
     "api": ["insecure_ep", "cmd_inject", "idor"],
@@ -33,6 +39,9 @@ BATTLE_DURATION = SLOT_DURATION * len(SLOTS)
 state_lock = threading.Lock()
 scheduler = BackgroundScheduler(daemon=True)
 scheduler.start()
+
+_allocated_proxy_ports = set()
+_allocated_ide_ports = set()
 
 current_slot = 0
 battle_started = False
@@ -46,10 +55,30 @@ hp_store: Dict[str, Dict[str, Any]] = {}
 overrides: Dict[str, Dict[str, Any]] = {}
 events: List[Dict[str, Any]] = []
 scores_cache: Dict[str, Any] = {}
+FLAG_USED_TTL = int(os.getenv("FLAG_USED_TTL", "30"))
+used_flags: Dict[str, int] = {}
 
 
 def now_ts() -> int:
     return int(time.time())
+
+
+def allocate_random_port(used_ports, low: int, high: int) -> int:
+    candidates = [port for port in range(low, high + 1) if port not in used_ports]
+    if not candidates:
+        raise RuntimeError(f"no ports available in range {low}-{high}")
+    port = random.SystemRandom().choice(candidates)
+    used_ports.add(port)
+    return port
+
+
+def release_team_ports(team: Dict[str, Any]) -> None:
+    proxy_port = team.get("proxy_port")
+    ide_port = team.get("ide_port")
+    if isinstance(proxy_port, int):
+        _allocated_proxy_ports.discard(proxy_port)
+    if isinstance(ide_port, int):
+        _allocated_ide_ports.discard(ide_port)
 
 
 def json_headers() -> Dict[str, str]:
@@ -275,6 +304,28 @@ def check_secret(payload: Dict[str, Any]) -> bool:
     return payload.get("secret") == SECRET
 
 
+def _used_flag_key(resolved_target: str, flag: str) -> str:
+    return f"{resolved_target}|{flag}"
+
+
+def purge_expired_used_flags() -> None:
+    now = now_ts()
+    expired = [k for k, v in used_flags.items() if v <= now]
+    for k in expired:
+        used_flags.pop(k, None)
+
+
+def is_flag_used(resolved_target: str, flag: str) -> bool:
+    with state_lock:
+        purge_expired_used_flags()
+        return _used_flag_key(resolved_target, flag) in used_flags
+
+
+def mark_flag_used(resolved_target: str, flag: str) -> None:
+    with state_lock:
+        used_flags[_used_flag_key(resolved_target, flag)] = now_ts() + FLAG_USED_TTL
+
+
 @app.errorhandler(Exception)
 def handle_exception(error):
     code = 500
@@ -326,11 +377,13 @@ def register():
         if match:
             team_id = int(match.group(1))
 
-    if proxy_port is None and isinstance(team_id, int) and team_id >= 1:
-        proxy_port = 9100 + (team_id - 1)
+    if proxy_port is None:
+        with state_lock:
+            proxy_port = allocate_random_port(_allocated_proxy_ports, PROXY_PORT_MIN, PROXY_PORT_MAX)
 
-    if ide_port is None and isinstance(team_id, int) and team_id >= 1:
-        ide_port = 8100 + (team_id - 1)
+    if ide_port is None:
+        with state_lock:
+            ide_port = allocate_random_port(_allocated_ide_ports, IDE_PORT_MIN, IDE_PORT_MAX)
 
     with state_lock:
         teams[ip] = {
@@ -548,6 +601,114 @@ def post_events():
     return jsonify({"ok": True})
 
 
+@app.post("/submit_flag")
+def submit_flag():
+    payload = request.get_json(silent=True) or {}
+    source = payload.get("source_team_ip") or payload.get("source_team")
+    target = payload.get("target_team_ip") or payload.get("target_team")
+    service = payload.get("target_service")
+    flag = payload.get("flag")
+    timestamp = int(payload.get("timestamp", now_ts()))
+
+    if not source or not target or not service or not flag:
+        return jsonify({"ok": False, "error": "missing fields"}), 400
+
+    # Allow target to be provided as internal ip, proxy port, or team id
+    resolved_target = None
+    with state_lock:
+        if target in teams:
+            resolved_target = target
+        else:
+            # try match by proxy_port
+            for ip, meta in teams.items():
+                if str(meta.get("proxy_port")) == str(target) or str(meta.get("ide_port")) == str(target):
+                    resolved_target = ip
+                    break
+            if resolved_target is None:
+                try:
+                    tnum = int(str(target))
+                    for ip, meta in teams.items():
+                        if meta.get("team_id") == tnum:
+                            resolved_target = ip
+                            break
+                except Exception:
+                    resolved_target = None
+
+    if not resolved_target:
+        return jsonify({"ok": False, "error": "unknown target"}), 400
+
+    # reject reused flags (short-lived single-use enforcement)
+    if is_flag_used(resolved_target, flag):
+        replay_event = {
+            "type": "exploit_replay",
+            "source_team_ip": source,
+            "target_team_ip": resolved_target,
+            "target_service": service,
+            "vuln": payload.get("vuln", "unknown"),
+            "hp_delta": 0,
+            "timestamp": timestamp,
+        }
+        with state_lock:
+            append_event(replay_event)
+        return jsonify({"ok": False, "result": "reused"}), 200
+
+    # verify by calling target service /flag/verify
+    resp = call_team(resolved_target, "POST", team_service_path(service, "/flag/verify"), {"flag": flag}, retries=2)
+
+    if resp and isinstance(resp, dict) and resp.get("ok"):
+        # mark this flag as used so it cannot be replayed
+        try:
+            mark_flag_used(resolved_target, flag)
+        except Exception:
+            log.warning("failed to mark flag used for %s", resolved_target)
+
+        event = {
+            "type": "exploit_success",
+            "source_team_ip": source,
+            "target_team_ip": target,
+            "target_service": service,
+            "vuln": payload.get("vuln", "unknown"),
+            "hp_delta": int(payload.get("hp_delta", -8)),
+            "timestamp": timestamp,
+        }
+        with state_lock:
+            append_event(event)
+
+        # apply damage like in /events handling
+        damage_amount = abs(int(event.get("hp_delta", 0))) if int(event.get("hp_delta", 0)) != 0 else 8
+        team_resp = call_team(
+            resolved_target,
+            "POST",
+            team_service_path(service, "/damage"),
+            {"amount": damage_amount, "secret": SECRET},
+            retries=3,
+        )
+        with state_lock:
+            if resolved_target in hp_store:
+                if team_resp and isinstance(team_resp, dict) and "hp" in team_resp:
+                    hp_store[resolved_target][service] = max(0, min(MAX_HP[service], int(team_resp["hp"])))
+                else:
+                    hp_store[resolved_target][service] = max(0, hp_store[resolved_target][service] - damage_amount)
+
+        compute_scores()
+        return jsonify({"ok": True, "result": "verified"})
+
+    # not verified -> record attempt
+    attempt_event = {
+        "type": "exploit_attempt",
+        "source_team_ip": source,
+        "target_team_ip": resolved_target or target,
+        "target_service": service,
+        "vuln": payload.get("vuln", "unknown"),
+        "hp_delta": 0,
+        "timestamp": timestamp,
+    }
+    with state_lock:
+        append_event(attempt_event)
+    compute_scores()
+    return jsonify({"ok": False, "result": "invalid"}), 200
+
+
 @app.get("/events")
 def get_events():
     with state_lock:
@@ -643,9 +804,11 @@ def admin_remove_team():
         return jsonify({"ok": False, "error": "team not found"}), 404
 
     with state_lock:
-        teams.pop(team_ip, None)
+        team = teams.pop(team_ip, None)
         hp_store.pop(team_ip, None)
         overrides.pop(team_ip, None)
+        if team:
+            release_team_ports(team)
 
     return jsonify({"ok": True})
 

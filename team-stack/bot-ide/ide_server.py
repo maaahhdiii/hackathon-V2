@@ -18,6 +18,9 @@ ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://orchestrator:9000")
 SECRET = os.getenv("HACKATHON_SECRET", "HACKATHON_SECRET_2025")
 MY_PROXY_PORT = os.getenv("MY_PROXY_PORT", "9100")
 SERVER_IP = os.getenv("SERVER_IP", "192.168.1.100")
+DISCOVERY_HOST = os.getenv("DISCOVERY_HOST", SERVER_IP)
+DISCOVERY_PORT_MIN = int(os.getenv("DISCOVERY_PORT_MIN", "12000"))
+DISCOVERY_PORT_MAX = int(os.getenv("DISCOVERY_PORT_MAX", "12999"))
 MY_PROXY_INTERNAL = os.getenv("MY_PROXY_INTERNAL", f"http://team{TEAM_ID}-proxy")
 WORKSPACE = Path("/app/workspace")
 
@@ -153,6 +156,9 @@ def run_bot(bot_name):
             "HACKATHON_SECRET": SECRET,
             "MY_PROXY_PORT": MY_PROXY_PORT,
             "SERVER_IP": SERVER_IP,
+            "DISCOVERY_HOST": DISCOVERY_HOST,
+            "DISCOVERY_PORT_MIN": str(DISCOVERY_PORT_MIN),
+            "DISCOVERY_PORT_MAX": str(DISCOVERY_PORT_MAX),
             "TEAM_ID": TEAM_ID,
             "TEAM_NAME": TEAM_NAME,
             "MY_TARGET": MY_PROXY_INTERNAL,
@@ -205,50 +211,6 @@ def status():
 
 @app.get("/api/context")
 def context():
-    teams = []
-    try:
-        resp = requests.get(f"{ORCHESTRATOR_URL}/teams", timeout=3)
-        teams = resp.json().get("teams", []) if resp.ok else []
-    except Exception:
-        teams = []
-
-    normalized = []
-    for t in teams:
-        team_id = t.get("team_id")
-        proxy_port = t.get("proxy_port")
-        ip_value = str(t.get("ip", ""))
-
-        if team_id is None and isinstance(t.get("name"), str):
-            name_match = re.search(r"(\d+)", t.get("name", ""))
-            if name_match:
-                team_id = int(name_match.group(1))
-
-        if team_id is None and ip_value:
-            ip_match = re.match(r"team(\d+)-proxy$", ip_value)
-            if ip_match:
-                team_id = int(ip_match.group(1))
-
-        if proxy_port is None and isinstance(team_id, int) and team_id >= 1:
-            proxy_port = 9100 + (team_id - 1)
-
-        if team_id is None and ip_value:
-            team_id = ip_value
-
-        normalized.append({"team_id": team_id, "name": t.get("name", t.get("team_name", "Team")), "proxy_port": proxy_port})
-
-    enemy_targets = []
-    enemy_targets_external = []
-    for t in normalized:
-        port = t.get("proxy_port")
-        team_id = t.get("team_id")
-        if port is None:
-            continue
-        if str(team_id) == str(TEAM_ID):
-            continue
-        enemy_targets_external.append(f"http://{SERVER_IP}:{port}")
-        if isinstance(team_id, int) and team_id >= 1:
-            enemy_targets.append(f"http://team{team_id}-proxy")
-
     return jsonify(
         {
             "team_id": TEAM_ID,
@@ -257,11 +219,12 @@ def context():
             "my_proxy_internal": MY_PROXY_INTERNAL,
             "orchestrator": ORCHESTRATOR_URL,
             "server_ip": SERVER_IP,
-            "all_teams": normalized,
-            "enemy_targets": enemy_targets,
-            "enemy_targets_external": enemy_targets_external,
+            "discovery_host": DISCOVERY_HOST,
+            "discovery_port_min": DISCOVERY_PORT_MIN,
+            "discovery_port_max": DISCOVERY_PORT_MAX,
             "active_service_url": f"{ORCHESTRATOR_URL}/current",
             "events_url": f"{ORCHESTRATOR_URL}/events",
+            "submit_flag_url": f"{ORCHESTRATOR_URL}/submit_flag",
         }
     )
 

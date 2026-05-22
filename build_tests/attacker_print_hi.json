@@ -1,0 +1,1 @@
+﻿{"content":"\"\"\"\nStarter attacker bot that proves stdout capture works.\n\"\"\"\n\ndef main():\n    print(\"hi\", flush=True)\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n"}

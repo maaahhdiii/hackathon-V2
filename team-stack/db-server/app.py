@@ -8,6 +8,7 @@ from pathlib import Path
 from flask import Flask, jsonify, render_template_string, request
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
+from common.flag_runtime import FlagRuntime
 
 app = Flask(__name__)
 CORS(app)
@@ -27,6 +28,8 @@ vulnerabilities = {
     "sqli": False,
     "priv_esc": False,
 }
+
+FLAG_RUNTIME = FlagRuntime("db")
 
 VULN_ALIAS = {
     "sql_injection": "sqli",
@@ -215,9 +218,20 @@ def health():
             "hp": hp_value,
             "max_hp": MAX_HP,
             "vulns_active": active,
+            "current_flag": FLAG_RUNTIME.current_flag(),
             "timestamp": int(time.time()),
         }
     )
+
+
+@app.post("/flag/verify")
+def verify_flag():
+    payload = request.get_json(silent=True) or {}
+    flag = payload.get("flag")
+    if not flag:
+        return jsonify({"ok": False, "error": "flag required"}), 400
+    ok = FLAG_RUNTIME.verify(flag)
+    return jsonify({"ok": ok})
 
 
 @app.post("/flags/activate")

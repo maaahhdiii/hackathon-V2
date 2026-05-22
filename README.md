@@ -458,6 +458,12 @@ Recommended (Windows): use the launcher from project root.
 
 - Start with no pre-registered teams (recommended for event-day CRUD):
 
+## Randomized ports and discovery
+
+- Team proxy and IDE ports are assigned randomly when teams are registered.
+- Participant bots receive a discovery host and port range, but no enemy list or starter scan logic is provided.
+- Teams must implement their own scanning and target-selection strategy.
+
 ```powershell
 Set-Location "d:\hckathoun V2\hackathon"
 ./start-platform.bat

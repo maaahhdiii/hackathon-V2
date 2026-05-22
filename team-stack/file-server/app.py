@@ -8,6 +8,7 @@ from flask import Flask, jsonify, render_template_string, request, send_from_dir
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 from werkzeug.utils import secure_filename
+from common.flag_runtime import FlagRuntime
 
 app = Flask(__name__)
 CORS(app)
@@ -28,6 +29,8 @@ vulnerabilities = {
     "path_traversal": False,
     "exec_upload": False,
 }
+
+FLAG_RUNTIME = FlagRuntime("file")
 
 VULN_ALIAS = {
     "sql_injection": "path_traversal",
@@ -195,9 +198,20 @@ def health():
             "hp": hp_value,
             "max_hp": MAX_HP,
             "vulns_active": active,
+            "current_flag": FLAG_RUNTIME.current_flag(),
             "timestamp": int(time.time()),
         }
     )
+
+
+@app.post("/flag/verify")
+def verify_flag():
+    payload = request.get_json(silent=True) or {}
+    flag = payload.get("flag")
+    if not flag:
+        return jsonify({"ok": False, "error": "flag required"}), 400
+    ok = FLAG_RUNTIME.verify(flag)
+    return jsonify({"ok": ok})
 
 
 @app.post("/flags/activate")

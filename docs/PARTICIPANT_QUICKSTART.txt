@@ -1,0 +1,89 @@
+Participant Quickstart & Mini Guide
+
+Goal
+- Build real exploits against other teams' services using the provided IDEs and your own code. The old /attack shortcuts are disabled—you must implement real exploit logic.
+
+Basic facts
+- Server IP: the operator will provide `SERVER_IP` (e.g. 192.168.1.100).
+- Team ports: each team has a proxy on ports 9100..9109 and an IDE on ports 8100..8109.
+  - Team N proxy: http://<SERVER_IP>:9(1)(N-1)00 — e.g. Team 1 proxy -> http://<SERVER_IP>:9100
+  - Team N IDE: http://<SERVER_IP>:81(0+N-1)00 — e.g. Team 1 IDE -> http://<SERVER_IP>:8100
+
+What you should do (quick checklist)
+1. Open your team's IDE in a browser: http://<SERVER_IP>:<your_ide_port>
+2. Inspect the starter-bots folder in the IDE (`attacker.*`, `defender.*`). Both starter bots are intentionally blank.
+3. Write an attacker program (language of your choice) that performs HTTP requests to other teams' proxies to exploit a vulnerability.
+4. Write a defender program if you want to automate healing or deactivation checks, but it is optional.
+5. Test exploits locally by curling the target proxy or using the IDE-runner.
+6. Submit demonstrable success using the in-game mechanics (the platform records events when your exploit succeeds).
+7. Keep logs and evidence (stdout from your bot) for judges.
+
+IDE usage (quick)
+- List files: GET /api/files
+- Read file: GET /api/files/<filename>
+- Save file: POST /api/files/<filename> with JSON {"content":"..."}
+- Run bot: POST /api/run/attacker with JSON {"filename":"attacker.py"}
+- View logs: GET /api/logs/attacker
+
+Example (PowerShell-friendly) commands
+- List files in team1 IDE:
+  curl.exe http://<SERVER_IP>:8100/api/files
+
+- Run a local test against a target (Team 2 web page example):
+  curl.exe -sS http://<SERVER_IP>:9101/web/search?q=payload
+
+- Run your attacker in the IDE (example starts the bot process):
+  curl.exe -X POST http://<SERVER_IP>:8100/api/run/attacker -H "Content-Type: application/json" --data-binary '{"filename":"attacker.py"}'
+
+- Tail bot logs:
+  curl.exe http://<SERVER_IP>:8100/api/logs/attacker
+
+What endpoints are useful (examples)
+- Web service: /web/login, /web/search, /web/comment (may vary per challenge)
+- API service: /api/users/<id>, /api/run, /api/admin
+- File service: /file/download?file=..., /file/upload
+- DB service: /db/query, /db/user/<id>/promote
+- Health checks (for debugging): /web/health, /api/health, /file/health, /db/health
+
+Defender bot note
+- The defender starter bot is also empty by default.
+- If you choose to use it, make it focus on defensive automation such as checking service health, healing, or recording suspicious activity.
+
+Important rules (read carefully)
+- Do NOT expect or use a convenience `/attack` endpoint. It is disabled. You must write real exploits.
+- Only target the contest network and team proxies listed by the organizers. Do not scan or attack infrastructure outside this environment.
+- Exploits that intentionally damage or disrupt the platform (or other teams beyond the contest rules) are forbidden.
+- Keep all tooling and artifacts in your team's workspace. Do not exfiltrate sensitive platform data.
+- If you find an accidental platform vulnerability (not part of the contest), immediately contact ops and do not exploit it.
+
+Scoring basics (how points are earned)
+- You earn points for successful exploits against live services (measured by the orchestrator).
+- Defense points come from preventing attacks and keeping services healthy.
+- Judges may request evidence (bot logs, curl output) to validate claims.
+
+Troubleshooting
+- If your IDE run returns "file not found" check `/api/files` to confirm filename and path.
+- If a target returns 404 from the proxy, try the service-specific path (e.g. /web/ or /api/). Proxies may return generic 404 for non-existent routes.
+- Use `curl.exe` on Windows to avoid PowerShell quoting pitfalls (use `--data-binary @file.json` for complex JSON).
+
+Help & Contacts
+- On-day support: ping the organizers in the event chat or reach the ops desk at the event.
+- For urgent platform problems, show your bot logs and the `curl` output you used.
+
+Short examples to copy (replace placeholders)
+
+# Check your IDE files
+curl.exe http://<SERVER_IP>:8100/api/files
+
+# Run attacker (example)
+curl.exe -X POST http://<SERVER_IP>:8100/api/run/attacker -H "Content-Type: application/json" --data-binary '{"filename":"attacker.py"}'
+
+# Get logs
+curl.exe http://<SERVER_IP>:8100/api/logs/attacker
+
+Notes for more advanced teams
+- Build a solver that enumerates likely endpoints and validates responses for flags or state change.
+- Use rate-limiting and respectful timing (do not DOS other teams). The orchestrator may penalize DoS behavior.
+- Consider defensive scripts to heal and rotate vulnerabilities as the battle progresses.
+
+Good luck — write real exploits, test carefully, and keep logs for judges.

@@ -5,28 +5,36 @@ networks:
     driver: bridge
 
 x-team-web: &team-web
-  build: ../team-stack/web-server
+  build:
+    context: ../team-stack
+    dockerfile: web-server/Dockerfile
   networks: [battle-net, management-net]
   environment:
     - HACKATHON_SECRET=HACKATHON_SECRET_2025
   restart: unless-stopped
 
 x-team-api: &team-api
-  build: ../team-stack/api-server
+  build:
+    context: ../team-stack
+    dockerfile: api-server/Dockerfile
   networks: [battle-net, management-net]
   environment:
     - HACKATHON_SECRET=HACKATHON_SECRET_2025
   restart: unless-stopped
 
 x-team-file: &team-file
-  build: ../team-stack/file-server
+  build:
+    context: ../team-stack
+    dockerfile: file-server/Dockerfile
   networks: [battle-net, management-net]
   environment:
     - HACKATHON_SECRET=HACKATHON_SECRET_2025
   restart: unless-stopped
 
 x-team-db: &team-db
-  build: ../team-stack/db-server
+  build:
+    context: ../team-stack
+    dockerfile: db-server/Dockerfile
   networks: [battle-net, management-net]
   environment:
     - HACKATHON_SECRET=HACKATHON_SECRET_2025

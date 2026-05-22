@@ -1,0 +1,3 @@
+run attacker team1 after emptying starters
+{"bot":"attacker","filename":"attacker.py","ok":true,"pid":13}
+{"logs":[],"running":true}

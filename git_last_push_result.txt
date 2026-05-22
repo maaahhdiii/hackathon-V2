@@ -1,0 +1,9 @@
+﻿git : To https://github.com/maaahhdiii/hackathon-V2
+Au caractère Ligne:1 : 195
++ ... rite-Output 'no changes to commit'; git push origin HEAD 2>&1 | Out-F ...
++                                         ~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (To https://gith...ii/hackathon-V2 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   88fd84f..b4bb1fb  HEAD -> main

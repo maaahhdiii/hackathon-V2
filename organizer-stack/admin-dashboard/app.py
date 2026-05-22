@@ -1,5 +1,6 @@
 import os
 import re
+import random
 import threading
 import logging
 import time
@@ -23,18 +24,56 @@ AUTO_STOP_WAIT_SECONDS = int(os.getenv("AUTO_STOP_WAIT_SECONDS", "60"))
 COMPOSE_PROJECT_NAME = os.getenv("COMPOSE_PROJECT_NAME", "organizer-stack")
 BATTLE_NETWORK = f"{COMPOSE_PROJECT_NAME}_battle-net"
 MANAGEMENT_NETWORK = f"{COMPOSE_PROJECT_NAME}_management-net"
+TEAM_PROXY_PORT_MIN = int(os.getenv("TEAM_PROXY_PORT_MIN", "12000"))
+TEAM_PROXY_PORT_MAX = int(os.getenv("TEAM_PROXY_PORT_MAX", "12999"))
+TEAM_IDE_PORT_MIN = int(os.getenv("TEAM_IDE_PORT_MIN", "13000"))
+TEAM_IDE_PORT_MAX = int(os.getenv("TEAM_IDE_PORT_MAX", "13999"))
+
+_port_lock = threading.Lock()
+_allocated_proxy_ports = set()
+_allocated_ide_ports = set()
+_team_runtime_cache = {}
 
 _docker_client = None
 
 
 def team_runtime_info(team_no: int):
-    return {
-        "team_id": team_no,
-        "ip": f"team{team_no}-proxy",
-        "proxy_port": 9100 + (team_no - 1),
-        "ide_port": 8100 + (team_no - 1),
-        "name": f"Team {team_no}",
-    }
+    with _port_lock:
+        cached = _team_runtime_cache.get(team_no)
+        if cached:
+            return dict(cached)
+
+        proxy_candidates = [port for port in range(TEAM_PROXY_PORT_MIN, TEAM_PROXY_PORT_MAX + 1) if port not in _allocated_proxy_ports]
+        ide_candidates = [port for port in range(TEAM_IDE_PORT_MIN, TEAM_IDE_PORT_MAX + 1) if port not in _allocated_ide_ports]
+
+        if not proxy_candidates:
+            raise RuntimeError("no proxy ports available for team allocation")
+        if not ide_candidates:
+            raise RuntimeError("no IDE ports available for team allocation")
+
+        info = {
+            "team_id": team_no,
+            "ip": f"team{team_no}-proxy",
+            "proxy_port": random.SystemRandom().choice(proxy_candidates),
+            "ide_port": random.SystemRandom().choice(ide_candidates),
+            "name": f"Team {team_no}",
+            "discovery_host": os.getenv("SERVER_IP", "192.168.1.100"),
+            "discovery_port_min": TEAM_PROXY_PORT_MIN,
+            "discovery_port_max": TEAM_PROXY_PORT_MAX,
+        }
+        _allocated_proxy_ports.add(info["proxy_port"])
+        _allocated_ide_ports.add(info["ide_port"])
+        _team_runtime_cache[team_no] = info
+        return dict(info)
+
+
+def release_team_runtime_info(team_no: int):
+    with _port_lock:
+        info = _team_runtime_cache.pop(team_no, None)
+        if not info:
+            return
+        _allocated_proxy_ports.discard(info.get("proxy_port"))
+        _allocated_ide_ports.discard(info.get("ide_port"))
 
 
 def get_docker_client():
@@ -107,6 +146,9 @@ def create_team_container(team_no: int, service: str):
             "HACKATHON_SECRET": SECRET,
             "MY_PROXY_PORT": str(info["proxy_port"]),
             "SERVER_IP": os.getenv("SERVER_IP", "192.168.1.100"),
+            "DISCOVERY_HOST": info["discovery_host"],
+            "DISCOVERY_PORT_MIN": str(info["discovery_port_min"]),
+            "DISCOVERY_PORT_MAX": str(info["discovery_port_max"]),
         }
         common_kwargs["volumes"] = {
             f"{COMPOSE_PROJECT_NAME}_team{team_no}-code": {"bind": "/app/workspace", "mode": "rw"}
@@ -176,6 +218,7 @@ def remove_team_runtime(team_no: int):
             container.remove(force=True)
         except Exception as exc:
             log.warning("Failed to remove container %s: %s", name, exc)
+    release_team_runtime_info(team_no)
 
 
 def stop_all_team_runtimes():
@@ -269,12 +312,13 @@ def register_test_teams(count=10, ip_prefix="192.168.1.", ip_start=101, team_pre
             ip = f"team{team_no}-proxy"
         else:
             ip = f"{ip_prefix}{ip_start + idx}"
+        info = team_runtime_info(team_no)
         payload = {
             "team_name": f"{team_prefix} {team_no}",
             "ip": ip,
             "team_id": team_no,
-            "proxy_port": 9100 + (team_no - 1),
-            "ide_port": 8100 + (team_no - 1),
+            "proxy_port": info["proxy_port"],
+            "ide_port": info["ide_port"],
         }
         try:
             if runtime_error:
@@ -346,12 +390,6 @@ def api_teams():
                 match = re.match(r"team(\d+)-proxy$", ip)
                 if match:
                     team_id = int(match.group(1))
-
-            if proxy_port is None and isinstance(team_id, int) and team_id >= 1:
-                proxy_port = 9100 + (team_id - 1)
-
-            if ide_port is None and isinstance(team_id, int) and team_id >= 1:
-                ide_port = 8100 + (team_id - 1)
 
             merged.append(
                 {

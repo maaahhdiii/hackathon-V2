@@ -5,6 +5,7 @@ import sqlite3
 import threading
 import time
 from pathlib import Path
+from common.flag_runtime import FlagRuntime
 
 import jwt
 from flask import Flask, jsonify, render_template_string, request
@@ -31,6 +32,9 @@ vulnerabilities = {
     "xss": False,
     "auth_bypass": False,
 }
+
+# Flag runtime for service-side rotating flags
+FLAG_RUNTIME = FlagRuntime("web")
 
 VULN_ALIAS = {
     "sql_injection": "sqli",
@@ -443,9 +447,20 @@ def health():
             "hp": hp_value,
             "max_hp": MAX_HP,
             "vulns_active": active,
+            "current_flag": FLAG_RUNTIME.current_flag(),
             "timestamp": int(time.time()),
         }
     )
+
+
+@app.post("/flag/verify")
+def verify_flag():
+    payload = request.get_json(silent=True) or {}
+    flag = payload.get("flag")
+    if not flag:
+        return jsonify({"ok": False, "error": "flag required"}), 400
+    ok = FLAG_RUNTIME.verify(flag)
+    return jsonify({"ok": ok})
 
 
 @app.post("/flags/activate")
