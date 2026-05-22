@@ -1,0 +1,123 @@
+HACKATHON PARTICIPANT GUIDE
+
+Purpose
+-------
+This guide explains what participants need to implement for both attacker and defender bots, what APIs are available to contestants, recommended timelines and behavior for attack bots (port detector → exploit → submit), defender responsibilities, and the contest rules.
+
+Important notes
+---------------
+- This guide provides high-level steps and best practices only — no exploit source code or starter scanners are provided. Teams must design their own scanning, fingerprinting, and exploitation logic.
+- Flags are short-lived and single-use. The orchestrator enforces single-use; replayed flags will be rejected.
+- The operator may enforce additional limits during the event (rate limits, firewall rules, or admin interventions).
+
+Provided context (what the platform gives you)
+---------------------------------------------
+- discovery_host: a single host/IP that all teams share (e.g. the event server). This is the host you must probe to find other teams' accessible ports.
+- discovery_port_min / discovery_port_max: the inclusive port range on `discovery_host` that teams should scan to discover opponent proxies/services.
+- proxy port range: teams' public proxy ports are allocated from `TEAM_PROXY_PORT_MIN`..`TEAM_PROXY_PORT_MAX` (default 12000-12999). Scan this range on `discovery_host` to find opponent proxies.
+- Orchestrator base URL: e.g. `http://orchestrator:9000` (provided in your IDE context). Use this to submit found flags.
+- Your IDE workspace includes a `submit_flag_url` pointing to the orchestrator submit endpoint.
+
+APIs teams may use (contestant-facing)
+--------------------------------------
+Orchestrator (contestant access):
+- GET /current
+   - Read-only, returns battle state (current active service slot, times, etc.). Useful to align attack attempts with active slots.
+- POST /submit_flag
+  - Submit a recovered flag for verification and scoring. Required fields: source team identifier, target identifier (team id or proxy port), target_service, `flag` value, timestamp. Orchestrator verifies by contacting the target service.
+
+Admin-only:
+- GET /teams
+   - Admins only (requires secret). Returns full team connection details including hostnames and proxy/IDE ports.
+
+Team service endpoints (each team's runtime exposes these on discovered ports):
+- GET /health
+  - Service health and some metadata. Use carefully; behaviour may differ by service.
+- POST /flag/verify
+  - Used by the orchestrator to verify submitted flags. Teams should not call this on other teams; it is a service-side verification endpoint.
+
+Admin-only or restricted endpoints (do NOT use):
+- /hp, /events, /scores, /stream — require admin secret and are not available to contestants.
+- /admin/* endpoints — strictly reserved for platform admins.
+
+Attacker Bot: recommended workflow and timeline
+----------------------------------------------
+Objective: discover reachable opponent services, identify the active service type (web/api/file/db), extract the current live flag for that service, and submit it quickly.
+
+Suggested high-level steps (implement in your bot):
+1. Port discovery (Phase 1 - discovery)
+   - Scan `discovery_host` across the provided port range to identify open TCP ports.
+   - Use concurrent connections for speed, but cap concurrency (see rate guidance below).
+   - Avoid scanning ports outside the provided range or your own assigned ports.
+2. Fingerprinting (Phase 2 - probe)
+   - For an open port, perform light application-layer probes (HTTP headers, small GET/HEAD) to detect service type and whether it responds like a known challenge service.
+   - Record the promising endpoints (e.g. `/`, `/health`) and response fingerprints (HTTP status, server header, timing).
+3. Service probe and exploit attempt (Phase 3 - exploit)
+   - Craft application-level probes aimed at retrieving a flag or triggering a behavior that yields the flag (teams must develop these per-service vulnerabilities). Flags follow the session format and are short-lived.
+   - Respect the rules; do not attempt to escalate to host OS or non-challenge services.
+4. Local verification (Phase 4 - confirm)
+   - Before submitting, do quick local checks to validate the retrieved token looks like a legit flag (format, length). This reduces invalid submits.
+5. Submit (Phase 5 - submit)
+   - POST to the orchestrator `/submit_flag` with the required fields. Submit quickly; single-use flags favor the fastest claimant.
+6. Backoff & retry
+   - If the flag is rejected as invalid or reused, back off, re-evaluate the fingerprint, and continue scanning other targets.
+
+Timing & rate guidance
+- Discovery scan: start with moderate concurrency (e.g., 20–50 concurrent TCP probes) and tune upward only after seeing stability. Avoid saturating network or triggering admin protections.
+- Application probes: keep per-target request rate low (e.g., <= 5 requests/sec) during fingerprinting; escalate only when confident.
+- Submit speed: aim to submit within 1–3 seconds after successful extraction — the orchestrator marks flags used atomically.
+
+Attacker bot safety & robustness
+- Retry on transient network errors with exponential backoff.
+- Detect and avoid scanning your own assigned proxy/IDE ports.
+- Instrument logs with timestamps for disputes (keep copies of every successful fetch).
+
+Defender Bot: recommended responsibilities and timeline
+-----------------------------------------------------
+Objective: detect and mitigate attacks, preserve service availability, and prevent flag theft while following contest rules.
+
+Recommended defender tasks:
+1. Baseline monitoring (continuous)
+   - Regularly poll local `/health` endpoints and core functionality to detect self-outage.
+   - Maintain a short rolling log of incoming connection patterns (IP, port, frequency).
+2. Detection rules (fast reactions)
+   - Rate anomalies: large bursts of distinct TCP connections or many flag-read patterns.
+   - Pattern fingerprints: repeated requests to unusual paths or sequences that previously correlated with flag extraction.
+3. Mitigation actions (automated, conservative)
+   - Rate-limit or temporarily throttle suspicious clients (per-IP or per-connection).
+   - Redirect obvious scanners to a honeypot endpoint that returns fake content.
+   - Prefer graceful heal operations over hard shutdowns; a hard shutdown penalizes your team.
+4. Recovery & logging (post-incident)
+   - Provide timelines and logs to support dispute resolution if a successful exploit is contested.
+
+Defender timing patterns
+- Health checks: 1–5s interval to detect outages quickly.
+- Short-term mitigation: block or throttle IPs for short windows (e.g., 30s–120s) before forced removal — avoid permanent blocks that could be abused.
+
+Rules and fair-play policy (must follow)
+----------------------------------------
+- Only scan the provided `discovery_host` and within `discovery_port_min`/`discovery_port_max`.
+- Do not attempt to attack the orchestrator, admin dashboard, or the event operator host systems.
+- Do not escalate to host OS or attempt lateral movement beyond challenge services.
+- Do not perform high-volume volumetric DDoS attacks. Excessive traffic may be throttled or cause disqualification.
+- Do not share or publish flags; they are single-use and private.
+- Follow admin instructions and event-specific additional rules.
+- Penalties exist for self-outage and false-positive reporting; ensure defender actions are measured.
+
+Practical tips and debugging
+----------------------------
+- Keep good local logging with timestamps and request/response samples for each flagged capture.
+- Implement quick local validators to reduce invalid submits.
+- Use randomized scanning order to avoid predictable collisions with other teams.
+- Test your bot in the provided IDE workspace against local sample services before the event.
+
+Operator contact and dispute process
+-----------------------------------
+- If your team believes a flag was stolen unfairly or a scoring dispute occurred, collect logs, timestamps, and request/response samples and contact the event operator with evidence.
+- Operators will review server-side logs and may request additional artifacts.
+
+Closing
+-------
+This guide is intended to orient teams quickly. The platform intentionally requires teams to build their own discovery, fingerprinting, and exploit logic. Good luck and be prepared to iterate quickly during the live session.
+
+End of guide

@@ -500,31 +500,23 @@ def current():
 
 @app.get("/teams")
 def get_teams():
-    # if caller provides the correct secret, return full team details (admin use)
+    # /teams is admin-only: require secret to get full team connection details
     payload = request.get_json(silent=True) or {}
     secret_param = request.args.get("secret") or payload.get("secret")
+    if secret_param != SECRET:
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
 
     with state_lock:
-        if secret_param == SECRET:
-            data = [
-                {
-                    "ip": ip,
-                    "name": meta.get("name", ip),
-                    "team_id": meta.get("team_id"),
-                    "proxy_port": meta.get("proxy_port"),
-                    "ide_port": meta.get("ide_port"),
-                }
-                for ip, meta in teams.items()
-            ]
-        else:
-            # non-admin callers get only non-sensitive info (no host/port details)
-            data = [
-                {
-                    "name": meta.get("name", ip),
-                    "team_id": meta.get("team_id"),
-                }
-                for ip, meta in teams.items()
-            ]
+        data = [
+            {
+                "ip": ip,
+                "name": meta.get("name", ip),
+                "team_id": meta.get("team_id"),
+                "proxy_port": meta.get("proxy_port"),
+                "ide_port": meta.get("ide_port"),
+            }
+            for ip, meta in teams.items()
+        ]
 
     return jsonify({"teams": data})
 
