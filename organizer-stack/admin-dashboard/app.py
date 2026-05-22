@@ -371,7 +371,7 @@ def api_state():
 @app.get("/api/teams")
 def api_teams():
     try:
-        teams_resp = requests.get(f"{ORCHESTRATOR_URL}/teams", timeout=5)
+        teams_resp = requests.get(f"{ORCHESTRATOR_URL}/teams", params={"secret": SECRET}, timeout=5)
         hp_resp = requests.get(f"{ORCHESTRATOR_URL}/hp", timeout=5)
         scores_resp = requests.get(f"{ORCHESTRATOR_URL}/scores", timeout=5)
 
