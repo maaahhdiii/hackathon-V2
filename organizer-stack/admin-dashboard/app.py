@@ -372,8 +372,8 @@ def api_state():
 def api_teams():
     try:
         teams_resp = requests.get(f"{ORCHESTRATOR_URL}/teams", params={"secret": SECRET}, timeout=5)
-        hp_resp = requests.get(f"{ORCHESTRATOR_URL}/hp", timeout=5)
-        scores_resp = requests.get(f"{ORCHESTRATOR_URL}/scores", timeout=5)
+        hp_resp = requests.get(f"{ORCHESTRATOR_URL}/hp", params={"secret": SECRET}, timeout=5)
+        scores_resp = requests.get(f"{ORCHESTRATOR_URL}/scores", params={"secret": SECRET}, timeout=5)
 
         teams_data = teams_resp.json().get("teams", []) if teams_resp.ok else []
         hp_data = hp_resp.json() if hp_resp.ok else {}
@@ -603,7 +603,7 @@ def api_hackathon_day_start():
 @app.get("/api/events")
 def api_events():
     try:
-        resp = requests.get(f"{ORCHESTRATOR_URL}/events", timeout=5)
+        resp = requests.get(f"{ORCHESTRATOR_URL}/events", params={"secret": SECRET}, timeout=5)
         return safe_json_response(resp)
     except Exception as exc:
         return jsonify({"ok": False, "error": str(exc)}), 500
@@ -614,7 +614,7 @@ def api_stream_proxy():
     def generate():
         while True:
             try:
-                with requests.get(f"{ORCHESTRATOR_URL}/stream", stream=True, timeout=65) as upstream:
+                with requests.get(f"{ORCHESTRATOR_URL}/stream", params={"secret": SECRET}, stream=True, timeout=65) as upstream:
                     for line in upstream.iter_lines(decode_unicode=True):
                         if line is None:
                             continue

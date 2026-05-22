@@ -531,6 +531,10 @@ def get_teams():
 
 @app.get("/hp")
 def get_hp():
+    # require admin secret for HP visibility
+    secret_param = request.args.get("secret") or (request.get_json(silent=True) or {}).get("secret")
+    if secret_param != SECRET:
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
     output = {}
     with state_lock:
         for ip in teams:
@@ -549,6 +553,10 @@ def get_hp():
 @app.post("/events")
 def post_events():
     payload = request.get_json(silent=True) or {}
+
+    # require admin secret to post events
+    if not check_secret(payload):
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
 
     event_type = payload.get("type", "exploit_attempt")
     source_team_ip = payload.get("source_team_ip") or payload.get("source_team")
@@ -726,6 +734,11 @@ def submit_flag():
 
 @app.get("/events")
 def get_events():
+    # require admin secret for events visibility
+    secret_param = request.args.get("secret") or (request.get_json(silent=True) or {}).get("secret")
+    if secret_param != SECRET:
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
     with state_lock:
         data = list(events[-100:])
     return jsonify({"events": data})
@@ -733,6 +746,11 @@ def get_events():
 
 @app.get("/scores")
 def get_scores():
+    # require admin secret for scores
+    secret_param = request.args.get("secret") or (request.get_json(silent=True) or {}).get("secret")
+    if secret_param != SECRET:
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
     return jsonify({"scores": compute_scores()})
 
 
@@ -830,6 +848,11 @@ def admin_remove_team():
 
 @app.get("/stream")
 def stream():
+    # require admin secret for real-time stream
+    secret_param = request.args.get("secret")
+    if secret_param != SECRET:
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
     def event_stream():
         while True:
             computed_scores = compute_scores()
