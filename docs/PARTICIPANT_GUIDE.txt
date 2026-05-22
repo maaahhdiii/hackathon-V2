@@ -15,6 +15,13 @@ Provided context (what the platform gives you)
 - discovery_host: a single host/IP that all teams share (e.g. the event server). This is the host you must probe to find other teams' accessible ports.
 - discovery_port_min / discovery_port_max: the inclusive port range on `discovery_host` that teams should scan to discover opponent proxies/services.
 - proxy port range: teams' public proxy ports are allocated from `TEAM_PROXY_PORT_MIN`..`TEAM_PROXY_PORT_MAX` (default 12000-12999). Scan this range on `discovery_host` to find opponent proxies.
+  
+Proxy ports and flag timing (important defaults)
+-----------------------------------------------
+- Proxy port range (where opponent proxies will appear): controlled by `TEAM_PROXY_PORT_MIN` and `TEAM_PROXY_PORT_MAX`. Default range: 12000–12999. Scan this range on `discovery_host`.
+- Flag rotation: flags are generated per short time window. Controlled by `FLAG_WINDOW_SECONDS` (default 15 seconds) with a grace period `FLAG_GRACE_SECONDS` (default 3 seconds). That means a new random flag is issued approximately every 15s and recent flags are accepted for a small grace window.
+- Flag single-use ledger TTL: the orchestrator keeps used-flag records for `FLAG_USED_TTL` seconds (default 30s) to prevent replays.
+- Active service slot duration: the orchestrator rotates which service is "active" every `SLOT_DURATION` seconds (default 450s). Active slots determine which service type scores more; flags still rotate independently per-window.
 - Orchestrator base URL: e.g. `http://orchestrator:9000` (provided in your IDE context). Use this to submit found flags.
 - Your IDE workspace includes a `submit_flag_url` pointing to the orchestrator submit endpoint.
 
@@ -26,19 +33,6 @@ Orchestrator (contestant access):
 - POST /submit_flag
   - Submit a recovered flag for verification and scoring. Required fields: source team identifier, target identifier (team id or proxy port), target_service, `flag` value, timestamp. Orchestrator verifies by contacting the target service.
 
-Admin-only:
-- GET /teams
-   - Admins only (requires secret). Returns full team connection details including hostnames and proxy/IDE ports.
-
-Team service endpoints (each team's runtime exposes these on discovered ports):
-- GET /health
-  - Service health and some metadata. Use carefully; behaviour may differ by service.
-- POST /flag/verify
-  - Used by the orchestrator to verify submitted flags. Teams should not call this on other teams; it is a service-side verification endpoint.
-
-Admin-only or restricted endpoints (do NOT use):
-- /hp, /events, /scores, /stream — require admin secret and are not available to contestants.
-- /admin/* endpoints — strictly reserved for platform admins.
 
 Attacker Bot: recommended workflow and timeline
 ----------------------------------------------
